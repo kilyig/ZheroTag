@@ -9,3 +9,6 @@ typechain-types
 cache
 artifacts
 
+# circom extras
+*.r1cs
+*.sym

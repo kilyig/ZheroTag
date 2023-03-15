@@ -16,4 +16,6 @@ artifacts
 *_js
 *.wasm
 *.zkey
+*.vkey.json
+*Verifier.sol
 ptau

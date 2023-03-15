@@ -12,3 +12,8 @@ artifacts
 # circom extras
 *.r1cs
 *.sym
+*_cpp
+*_js
+*.wasm
+*.zkey
+ptau

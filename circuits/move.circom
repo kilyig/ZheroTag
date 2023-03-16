@@ -1,5 +1,6 @@
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
+include "../node_modules/circomlib/circuits/gates.circom";
 include "./set_operations.circom";
 
 template Move(numBits, boardSizeX, boardSizeY) {
@@ -20,26 +21,37 @@ template Move(numBits, boardSizeX, boardSizeY) {
     oldHashChecker.inputs[2] <== saltOld;
     posHashOld === oldHashChecker.out;
 
-    // chess kings can only move to one of their Moore neighbors
+    /* chess kings can only move to one of their Moore neighbors */
+
+    // we don't explicitly calculate the absolute value of the change in each direction
+    // instead, we use the fact that the king has moved to one of its Moore neighbors
+    // iff either xNew - xOld or xOld - xNew is <= 1, for the x direction. 
+
+    // check the x direction
     component xDistCheck1 = LessEqThan(numBits);
     xDistCheck1.in[0] <== xNew - xOld;
     xDistCheck1.in[1] <== 1;
-    1 === xDistCheck1.out;
-
     component xDistCheck2 = LessEqThan(numBits);
     xDistCheck2.in[0] <== xOld - xNew;
     xDistCheck2.in[1] <== 1;
-    1 === xDistCheck2.out;
 
+    component xVerifier = OR();
+    xVerifier.a <== xDistCheck1.out;
+    xVerifier.b <== xDistCheck2.out;
+    1 === xVerifier.out;
+
+    // check the y direction
     component yDistCheck1 = LessEqThan(numBits);
     yDistCheck1.in[0] <== yNew - yOld;
     yDistCheck1.in[1] <== 1;
-    1 === yDistCheck1.out;
-
     component yDistCheck2 = LessEqThan(numBits);
     yDistCheck2.in[0] <== yOld - yNew;
     yDistCheck2.in[1] <== 1;
-    1 === yDistCheck2.out;
+
+    component yVerifier = OR();
+    yVerifier.a <== yDistCheck1.out;
+    yVerifier.b <== yDistCheck2.out;
+    1 === yVerifier.out;
 
     // should the user necessarily move?
 

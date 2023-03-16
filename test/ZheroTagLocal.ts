@@ -92,10 +92,10 @@ describe("ZheroTagLocal", function () {
             const { whiteGameState, blackGameState } = await loadFixture(gameStateFixture);
 
             moveAndUpdateBoards(whiteGameState, blackGameState, 1, 0);
-            //moveAndUpdateBoards(blackGameState, whiteGameState, 4, 4);
-            //moveAndUpdateBoards(whiteGameState, blackGameState, 1, 1);
-            //moveAndUpdateBoards(blackGameState, whiteGameState, 3, 3);
-            //moveAndUpdateBoards(whiteGameState, blackGameState, 2, 2);
+            moveAndUpdateBoards(blackGameState, whiteGameState, 4, 4);
+            moveAndUpdateBoards(whiteGameState, blackGameState, 1, 1);
+            moveAndUpdateBoards(blackGameState, whiteGameState, 3, 3);
+            moveAndUpdateBoards(whiteGameState, blackGameState, 2, 2);
         });
     });
 });

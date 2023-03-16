@@ -19,10 +19,10 @@ const config: HardhatUserConfig = {
     ptau: "./ptau/powersOfTau28_hez_final_15.ptau",
     // (required) Each object in this array refers to a separate circuit
     circuits: [
-      //{ name: "move" },
+      { name: "move" },
       //{ name: "psi1" },
       //{ name: "psi2" },
-      { name: "psi3" }
+      //{ name: "psi3" }
     ],
   },
 };

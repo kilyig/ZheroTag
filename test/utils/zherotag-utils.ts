@@ -30,6 +30,69 @@ export type GameState = {
     beta: BigInt
 };
 
+export async function moveAndUpdateBoards(
+    gameStateMover: GameState,
+    gameStateOpponent: GameState,
+    xNew: number,
+    yNew: number
+) {
+    // player 1 starts by making a move
+    const [moveProof, movePublicSignals] = await move(gameStateMover, xNew, yNew);
+
+    /*
+        player 1 sends moveProof and movePublicSignals to player 1
+    */
+
+    // player 2 verifies that player 1's move was valid
+    verifyMoveProof(moveProof, movePublicSignals);
+    // player 2 updates its "posHashOpponent"
+    updateStateAfterOpponentMove(gameStateOpponent, movePublicSignals);
+
+    // now update both boards
+    const gameFinishedMoverPerspective = await updateBoard(gameStateMover, gameStateOpponent);
+    const gameFinishedOpponentPerspective = await updateBoard(gameStateOpponent, gameStateMover);
+
+    // TODO: does this assert work?
+    assert(gameFinishedMoverPerspective === gameFinishedOpponentPerspective);
+
+    return gameFinishedMoverPerspective;
+}
+
+export async function updateBoard(
+    gameStateToUpdate: GameState,
+    gameStateOpponent: GameState,
+) {
+    // ***** start MPC *****
+
+    // player 1 exponentiates its neighbor squares
+    const [psi1Proof, psi1PublicSignals] = await preparePSI1(gameStateToUpdate);
+
+    /*
+        player 1 sends psi1Proof and psi1PublicSignals to player 2
+    */
+
+    // player 2 receives psi1PublicSignals and verifies the proof
+    verifyPSI1(psi1Proof, psi1PublicSignals);
+
+
+    // PSI2
+    const [psi2Proof, psi2PublicSignals] = await preparePSI2(gameStateOpponent, psi1PublicSignals);
+
+    // player 2 sends psi2PublicSignals to player 1
+    // player 1 receives psi2PublicSignals and verifies the proof
+    verifyPSI2(psi2Proof, psi2PublicSignals, psi1PublicSignals);
+
+    // PSI 3
+    const [psi3Proof, psi3PublicSignals] = await preparePSI3(gameStateOpponent, psi2PublicSignals);
+
+    // player 1 sends psi3PublicSignals to player 2
+    // player 2 receives psi1PublicSignals and verifies the proof
+    // player 1 and 2 learn whether the game wsa finished or not
+    verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals);
+
+    const gameFinished = psi3PublicSignals[0];
+    return gameFinished;
+}
 
 export async function move(
     gameState: GameState,

@@ -18,6 +18,7 @@ import {
     preparePSI3,
     verifyPSI3,
     updateStateAfterOpponentMove,
+    moveAndUpdateBoards,
 } from "./utils/zherotag-utils";
 
 const MOVE_WASM_FILE_PATH = "circuits/move.wasm";
@@ -90,55 +91,11 @@ describe("ZheroTagLocal", function () {
         it("Basic move", async function () {
             const { whiteGameState, blackGameState } = await loadFixture(gameStateFixture);
 
-            // console.log(whiteGameState);
-            // console.log(blackGameState);
-
-            // player 1 starts by making a move
-            const [moveProof, movePublicSignals] = await move(whiteGameState, 1, 0);
-
-            /*
-                player 1 sends moveProof and movePublicSignals to player 1
-            */
-
-            // player 2 verifies that player 1's move was valid
-            verifyMoveProof(moveProof, movePublicSignals);
-            // player 2 updates its "posHashOpponent"
-            updateStateAfterOpponentMove(blackGameState, movePublicSignals);
-
-
-            // ***** start MPC *****
-
-            // player 1 exponentiates its neighbor squares
-            const [psi1Proof, psi1PublicSignals] = await preparePSI1(whiteGameState);
-
-            /*
-                player 1 sends psi1Proof and psi1PublicSignals to player 2
-            */
-
-            // player 2 receives psi1PublicSignals and verifies the proof
-            verifyPSI1(psi1Proof, psi1PublicSignals);
-
-
-            // PSI2
-            const [psi2Proof, psi2PublicSignals] = await preparePSI2(blackGameState, psi1PublicSignals);
-
-            // console.log(psi1PublicSignals);
-            // console.log(psi2PublicSignals);
-
-            // player 2 sends psi2PublicSignals to player 1
-            // player 1 receives psi2PublicSignals and verifies the proof
-            verifyPSI2(psi2Proof, psi2PublicSignals, psi1PublicSignals);
-
-            // PSI 3
-            const [psi3Proof, psi3PublicSignals] = await preparePSI3(blackGameState, psi2PublicSignals);
-
-            // player 1 sends psi3PublicSignals to player 2
-            // player 2 receives psi1PublicSignals and verifies the proof
-            // player 1 and 2 learn whether the game wsa finished or not
-            verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals);
-
-            // console.log(whiteGameState);
-            // console.log(blackGameState);
+            moveAndUpdateBoards(whiteGameState, blackGameState, 1, 0);
+            //moveAndUpdateBoards(blackGameState, whiteGameState, 4, 4);
+            //moveAndUpdateBoards(whiteGameState, blackGameState, 1, 1);
+            //moveAndUpdateBoards(blackGameState, whiteGameState, 3, 3);
+            //moveAndUpdateBoards(whiteGameState, blackGameState, 2, 2);
         });
     });
 });

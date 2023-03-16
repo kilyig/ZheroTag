@@ -90,9 +90,6 @@ export async function updateBoard(
     // player 1 and 2 learn whether the game wsa finished or not
     verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals);
 
-    console.log("Here is set1_prime for this PSI");
-    console.log(psi2PublicSignals.slice(0, 8));
-
     const gameFinished = psi3PublicSignals[0];
     return gameFinished;
 }
@@ -258,8 +255,8 @@ export async function verifyPSI2(
     }
     assert(arraysEqual(set1_me, set1_opponent));
 
-    console.log(set1_me);
-    console.log(set1_opponent);
+    //console.log(set1_me);
+    //console.log(set1_opponent);
 }
 
 // TODO: Why is there no built-in code for array comparison?
@@ -288,7 +285,7 @@ export async function preparePSI3(
     const set2 = psi2PublicSignals.slice(8, 9);
 
     const psi3CircuitInputs = {
-        alpha: BigInt("31475184"),
+        alpha: gameState.alpha,
         set1_prime: set1_prime,
         set2: set2
     }

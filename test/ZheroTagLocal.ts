@@ -95,12 +95,10 @@ describe("ZheroTagLocal", function () {
             console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 4, 4));
             console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 1));
             console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 3, 3));
-            console.log("Starting");
             console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 2, 2));
             console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 3));
-
-            //console.log(whiteGameState);
-            //console.log(blackGameState);
+            console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 3, 1));
+            console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 2));
         });
     });
 });

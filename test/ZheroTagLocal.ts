@@ -14,7 +14,10 @@ import {
     preparePSI1,
     verifyPSI1,
     preparePSI2,
-    updateStateAfterOpponentMove
+    verifyPSI2,
+    preparePSI3,
+    verifyPSI3,
+    updateStateAfterOpponentMove,
 } from "./utils/zherotag-utils";
 
 const MOVE_WASM_FILE_PATH = "circuits/move.wasm";
@@ -44,7 +47,17 @@ import { assert } from "console";
 // x: 5 y: 5 salt: 12345
 // 9435539296313397007849595282098379346206722261888911142952399734225356376203
 
+/* inclusive boundaries:
+ * psi1PublicSignals[0 - 7]: set1
+ * psi1PublicSignals[8]: posHash
+ */
 
+/* inclusive boundaries:
+ * psi2PublicSignals[0 - 7]: set1_prime
+ * psi2PublicSignals[8]: set2
+ * psi2PublicSignals[9]: posHash
+ * psi2PublicSignals[10-17]: set1
+ */
 describe("ZheroTagLocal", function () {
     // We define a fixture to reuse the same setup in every test.
     // We use loadFixture to run this setup once, snapshot that state,
@@ -77,6 +90,9 @@ describe("ZheroTagLocal", function () {
         it("Basic move", async function () {
             const { whiteGameState, blackGameState } = await loadFixture(gameStateFixture);
 
+            // console.log(whiteGameState);
+            // console.log(blackGameState);
+
             // player 1 starts by making a move
             const [moveProof, movePublicSignals] = await move(whiteGameState, 1, 0);
 
@@ -92,7 +108,7 @@ describe("ZheroTagLocal", function () {
 
             // ***** start MPC *****
 
-            // player 1 exponentiates it's neighbor squares
+            // player 1 exponentiates its neighbor squares
             const [psi1Proof, psi1PublicSignals] = await preparePSI1(whiteGameState);
 
             /*
@@ -102,60 +118,31 @@ describe("ZheroTagLocal", function () {
             // player 2 receives psi1PublicSignals and verifies the proof
             verifyPSI1(psi1Proof, psi1PublicSignals);
 
-            return;
 
             // PSI2
             const [psi2Proof, psi2PublicSignals] = await preparePSI2(blackGameState, psi1PublicSignals);
 
-            console.log(psi2PublicSignals);
+            // console.log(psi1PublicSignals);
+            // console.log(psi2PublicSignals);
 
             // player 2 sends psi2PublicSignals to player 1
-            // player 1 receives psi1PublicSignals and verifies the proof
-            const psi2vKey = JSON.parse(fs.readFileSync(PSI2_VKEY_FILE_PATH, 'utf-8'));
-            const psi2res = await groth16.verify(psi2vKey, psi2PublicSignals, psi2Proof);
-            // player 1 also verifies that player 2 reexponentiated the right set
-            // ^^^ TODO
-            assert(psi2res === true);
+            // player 1 receives psi2PublicSignals and verifies the proof
+            verifyPSI2(psi2Proof, psi2PublicSignals, psi1PublicSignals);
 
             // PSI 3
-            const set1_prime = psi2PublicSignals.slice(0, 8);
-            const set2 = psi2PublicSignals.slice(8, 9);
-
-            const psi3CircuitInputs = {
-                alpha: BigInt("31475184"),
-                set1_prime: set1_prime,
-                set2: set2
-            }
-            const [psi3Proof, psi3PublicSignals] = await generateProof(
-                psi3CircuitInputs,
-                PSI3_WASM_FILE_PATH,
-                PSI3_ZKEY_FILE_PATH
-            );
-
-            console.log(psi3PublicSignals);
+            const [psi3Proof, psi3PublicSignals] = await preparePSI3(blackGameState, psi2PublicSignals);
 
             // player 1 sends psi3PublicSignals to player 2
             // player 2 receives psi1PublicSignals and verifies the proof
             // player 1 and 2 learn whether the game wsa finished or not
-            const psi3vKey = JSON.parse(fs.readFileSync(PSI3_VKEY_FILE_PATH, 'utf-8'));
-            const psi3res = await groth16.verify(psi3vKey, psi3PublicSignals, psi3Proof);
+            verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals);
 
-            assert(psi3res === true);
-
-        });
-    
-        it("Should set the right owner", async function () {
-    
-            //expect(await lock.owner()).to.equal(owner.address);
-        });
-    
-        it("Should receive and store the funds to lock", async function () {
-    
-
+            // console.log(whiteGameState);
+            // console.log(blackGameState);
         });
     });
 });
-  
+
 
 
 

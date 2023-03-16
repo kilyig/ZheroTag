@@ -48,7 +48,7 @@ export async function move(
     gameState.x = xNew;
     gameState.y = yNew;
     gameState.salt = saltNew;
-    gameState.posHash = movePublicSignals.slice(0, 1);
+    gameState.posHash = BigInt(movePublicSignals[0]);
 
     return [moveProof, movePublicSignals];
 }
@@ -57,7 +57,7 @@ export async function updateStateAfterOpponentMove(
     gameState: GameState,
     movePublicSignals: any
 ) {
-    gameState.posHashOpponent = movePublicSignals.slice(0,1);
+    gameState.posHashOpponent = BigInt(movePublicSignals[0]);
 }
 
 export async function move2(
@@ -123,7 +123,7 @@ export async function preparePSI1(
         posHash: gameState.posHash,
         alpha: gameState.alpha
     }
-    const { psi1Proof, psi1PublicSignals } = await groth16.fullProve(
+    const [psi1Proof, psi1PublicSignals] = await generateProof(
         psi1CircuitInputs,
         PSI1_WASM_FILE_PATH,
         PSI1_ZKEY_FILE_PATH
@@ -146,14 +146,18 @@ export async function preparePSI2(
     gameState: GameState,
     psi1PublicSignals: any
 ) {
+    // this will be random in the near future
+    const beta = BigInt("32457315139845");
+    gameState.beta = beta;
+
     const set1 = psi1PublicSignals.slice(0, 8);
 
     const psi2CircuitInputs = {
-        x: 5,
-        y: 5,
-        salt: 12345,
-        posHash: BigInt("9435539296313397007849595282098379346206722261888911142952399734225356376203"),
-        beta: BigInt("18549853174"),
+        x: gameState.x,
+        y: gameState.y,
+        salt: gameState.salt,
+        posHash: gameState.posHash,
+        beta: gameState.beta,
         set1: set1
     }
     const [psi2Proof, psi2PublicSignals] = await generateProof(
@@ -163,4 +167,84 @@ export async function preparePSI2(
     );
 
     return [psi2Proof, psi2PublicSignals];
+}
+
+export async function verifyPSI2(
+    psi2Proof: any,
+    psi2PublicSignals: any,
+    psi1PublicSignals: any
+) {
+    const psi2vKey = JSON.parse(fs.readFileSync(PSI2_VKEY_FILE_PATH, 'utf-8'));
+    const psi2res = await groth16.verify(psi2vKey, psi2PublicSignals, psi2Proof);
+    
+    assert(psi2res === true);
+
+    /* verify also that the opponent reexponentiated the right set */
+    // the set that I have produced by exponentiating my neighbor squares
+    const set1_me = psi1PublicSignals.slice(0, 8);
+    // the set that my opponent reexponentiated
+    const set1_opponent = psi2PublicSignals.slice(9, 17);
+    // these two sets should be the same
+    // TODO: this doesn't work
+    for (let i in set1_me) {
+        assert(set1_me[i] === set1_opponent[i]);
+    }
+    assert(arraysEqual(set1_me, set1_opponent));
+
+    console.log(set1_me);
+    console.log(set1_opponent);
+}
+
+// Why is there no built-in code for array comparison?
+// https://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript
+function arraysEqual(a: any, b: any) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length !== b.length) return false;
+  
+    // If you don't care about the order of the elements inside
+    // the array, you should sort both arrays here.
+    // Please note that calling sort on an array will modify that array.
+    // you might want to clone your array first.
+  
+    for (var i = 0; i < a.length; ++i) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+
+export async function preparePSI3(
+    gameState: GameState,
+    psi2PublicSignals: any
+) {
+    const set1_prime = psi2PublicSignals.slice(0, 8);
+    const set2 = psi2PublicSignals.slice(8, 9);
+
+    const psi3CircuitInputs = {
+        alpha: BigInt("31475184"),
+        set1_prime: set1_prime,
+        set2: set2
+    }
+    const [psi3Proof, psi3PublicSignals] = await generateProof(
+        psi3CircuitInputs,
+        PSI3_WASM_FILE_PATH,
+        PSI3_ZKEY_FILE_PATH
+    );
+
+    return [psi3Proof, psi3PublicSignals];
+}
+
+export async function verifyPSI3(
+    psi3Proof: any,
+    psi3PublicSignals: any,
+    psi2PublicSignals: any
+) {
+    const psi3vKey = JSON.parse(fs.readFileSync(PSI3_VKEY_FILE_PATH, 'utf-8'));
+    const psi3res = await groth16.verify(psi3vKey, psi3PublicSignals, psi3Proof);
+
+    // verify that the opponent really exponentiated your single-element set
+    // ^^^ TODO
+
+    assert(psi3res === true);
+
 }

@@ -90,6 +90,9 @@ export async function updateBoard(
     // player 1 and 2 learn whether the game wsa finished or not
     verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals);
 
+    console.log("Here is set1_prime for this PSI");
+    console.log(psi2PublicSignals.slice(0, 8));
+
     const gameFinished = psi3PublicSignals[0];
     return gameFinished;
 }
@@ -175,7 +178,7 @@ export async function verifyMoveProof(
 export async function preparePSI1(
     gameState: GameState,
 ) {
-    // this will be random in the near future
+    // TODO: this will be random in the near future
     const alpha = BigInt("32457315139845");
     gameState.alpha = alpha;
 
@@ -209,7 +212,7 @@ export async function preparePSI2(
     gameState: GameState,
     psi1PublicSignals: any
 ) {
-    // this will be random in the near future
+    // TODO: this will be random in the near future
     const beta = BigInt("32457315139845");
     gameState.beta = beta;
 
@@ -249,6 +252,7 @@ export async function verifyPSI2(
     const set1_opponent = psi2PublicSignals.slice(9, 17);
     // these two sets should be the same
     // TODO: this doesn't work
+    // maybe BigInt(set_1_me[i]) === BigInt(set1_opponent[i]) them?
     for (let i in set1_me) {
         assert(set1_me[i] === set1_opponent[i]);
     }
@@ -258,7 +262,7 @@ export async function verifyPSI2(
     console.log(set1_opponent);
 }
 
-// Why is there no built-in code for array comparison?
+// TODO: Why is there no built-in code for array comparison?
 // https://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript
 function arraysEqual(a: any, b: any) {
     if (a === b) return true;
@@ -305,8 +309,7 @@ export async function verifyPSI3(
     const psi3vKey = JSON.parse(fs.readFileSync(PSI3_VKEY_FILE_PATH, 'utf-8'));
     const psi3res = await groth16.verify(psi3vKey, psi3PublicSignals, psi3Proof);
 
-    // verify that the opponent really exponentiated your single-element set
-    // ^^^ TODO
+    // TODO: verify that the opponent really exponentiated your single-element set
 
     assert(psi3res === true);
 

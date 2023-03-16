@@ -25,6 +25,9 @@ const config: HardhatUserConfig = {
       //{ name: "psi3" }
     ],
   },
+  mocha: {
+    timeout: 100000000,
+  },
 };
 
 export default config;

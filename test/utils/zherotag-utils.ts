@@ -99,6 +99,7 @@ export async function move(
     xNew: number,
     yNew: number
 ) {
+    // TODO: make this random
     const saltNew = 12345;
 
     const [moveProof, movePublicSignals] = await prepareMoveProof(
@@ -121,19 +122,6 @@ export async function updateStateAfterOpponentMove(
     movePublicSignals: any
 ) {
     gameState.posHashOpponent = BigInt(movePublicSignals[0]);
-}
-
-export async function move2(
-    gameState: GameState,
-    xNew: number,
-    yNew: number,
-    saltNew: number,
-    posHashNew: BigInt
-) {
-    gameState.x = xNew;
-    gameState.y = yNew;
-    gameState.salt = saltNew;
-    gameState.posHash = posHashNew;
 }
 
 export async function prepareMoveProof(

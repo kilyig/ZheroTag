@@ -44,7 +44,10 @@ export async function moveAndUpdateBoards(
     */
 
     // player 2 verifies that player 1's move was valid
-    verifyMoveProof(moveProof, movePublicSignals);
+    if (await verifyMoveProof(moveProof, movePublicSignals, gameStateOpponent) === false) {
+        return [false, '2'];
+    }
+
     // player 2 updates its "posHashOpponent"
     updateStateAfterOpponentMove(gameStateOpponent, movePublicSignals);
 
@@ -75,8 +78,8 @@ export async function updateBoard(
     */
 
     // player 2 receives psi1PublicSignals and verifies the proof
-    if (!verifyPSI1(psi1Proof, psi1PublicSignals)) {
-        return [false, 2];
+    if (await verifyPSI1(psi1Proof, psi1PublicSignals) === false) {
+        return [false, '2'];
     }
 
 
@@ -85,8 +88,8 @@ export async function updateBoard(
 
     // player 2 sends psi2PublicSignals to player 1
     // player 1 receives psi2PublicSignals and verifies the proof
-    if(!verifyPSI2(psi2Proof, psi2PublicSignals, psi1PublicSignals)){
-        return [false, 2];
+    if(await verifyPSI2(psi2Proof, psi2PublicSignals, psi1PublicSignals) === false){
+        return [false, '2'];
     };
 
     // PSI 3
@@ -95,8 +98,8 @@ export async function updateBoard(
     // player 1 sends psi3PublicSignals to player 2
     // player 2 receives psi1PublicSignals and verifies the proof
     // player 1 and 2 learn whether the game wsa finished or not
-    if(!verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals)){
-        return [false, 2];
+    if(await verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals) === false){
+        return [false, '2'];
     };
 
     const gameFinished = psi3PublicSignals[0];
@@ -160,7 +163,8 @@ export async function prepareMoveProof(
 
 export async function verifyMoveProof(
     moveProof: any,
-    movePublicSignals: any
+    movePublicSignals: any,
+    gameState: GameState
 ) {
     // player 2 verifies that player 1's move was valid
     const movevKey = JSON.parse(fs.readFileSync(MOVE_VKEY_FILE_PATH, 'utf-8'));
@@ -170,7 +174,12 @@ export async function verifyMoveProof(
         return false;
     }
 
-    // TODO: other tests
+    // the previous position indicated in the zkp should be the previous position
+    // of my opponent.
+    const prevPosHashZKP = BigInt(movePublicSignals[1]);
+    if(prevPosHashZKP !== gameState.posHashOpponent) {
+        return false;
+    }
 
     return true;
 }

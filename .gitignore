@@ -18,4 +18,5 @@ artifacts
 *.zkey
 *.vkey.json
 *Verifier.sol
+*.wtns
 ptau

@@ -1,6 +1,8 @@
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
+include "../node_modules/circomlib/circuits/switcher.circom";
+
 include "./set_operations.circom";
 
 template Move(numBits, boardSizeX, boardSizeY) {
@@ -13,6 +15,7 @@ template Move(numBits, boardSizeX, boardSizeY) {
     signal input yNew;
     signal input saltNew;
     signal output posHashNew;
+
 
     // verify the old hash
     component oldHashChecker = Poseidon(3);
@@ -28,32 +31,36 @@ template Move(numBits, boardSizeX, boardSizeY) {
     // iff either xNew - xOld or xOld - xNew is <= 1, for the x direction. 
 
     // check the x direction
-    component xDistCheck1 = LessEqThan(numBits);
-    xDistCheck1.in[0] <== xNew - xOld;
-    xDistCheck1.in[1] <== 1;
-    component xDistCheck2 = LessEqThan(numBits);
-    xDistCheck2.in[0] <== xOld - xNew;
-    xDistCheck2.in[1] <== 1;
+    component xLessThan = LessThan(numBits);
+    xLessThan.in[0] <== xNew;
+    xLessThan.in[1] <== xOld;
 
-    component xVerifier = OR();
-    xVerifier.a <== xDistCheck1.out;
-    xVerifier.b <== xDistCheck2.out;
-    1 === xVerifier.out;
+    component xFindMinMax = Switcher();
+    xFindMinMax.sel <== xLessThan.out;
+    xFindMinMax.L <== xOld;
+    xFindMinMax.R <== xNew;
+
+    component xFinalCheck = LessEqThan(numBits);
+    xFinalCheck.in[0] <== xFindMinMax.outR - xFindMinMax.outL;
+    xFinalCheck.in[1] <== 1;
+
+    1 === xFinalCheck.out;
 
     // check the y direction
-    component yDistCheck1 = LessEqThan(numBits);
-    yDistCheck1.in[0] <== yNew - yOld;
-    yDistCheck1.in[1] <== 1;
-    component yDistCheck2 = LessEqThan(numBits);
-    yDistCheck2.in[0] <== yOld - yNew;
-    yDistCheck2.in[1] <== 1;
+    component yLessThan = LessThan(numBits);
+    yLessThan.in[0] <== yNew;
+    yLessThan.in[1] <== yOld;
 
-    component yVerifier = OR();
-    yVerifier.a <== yDistCheck1.out;
-    yVerifier.b <== yDistCheck2.out;
-    1 === yVerifier.out;
+    component yFindMinMax = Switcher();
+    yFindMinMax.sel <== yLessThan.out;
+    yFindMinMax.L <== yOld;
+    yFindMinMax.R <== yNew;
 
-    // should the user necessarily move?
+    component yFinalCheck = LessEqThan(numBits);
+    yFinalCheck.in[0] <== yFindMinMax.outR - yFindMinMax.outL;
+    yFinalCheck.in[1] <== 1;
+
+    1 === yFinalCheck.out;
 
     // check that the new position is within the board's bounds
     component boardXCheck = LessThan(numBits);
@@ -72,6 +79,7 @@ template Move(numBits, boardSizeX, boardSizeY) {
     newHashGenerator.inputs[1] <== yNew;
     newHashGenerator.inputs[2] <== saltNew;
     posHashNew <== newHashGenerator.out;
+
 }
 
 component main {public [posHashOld]} = Move(250, 6, 6);

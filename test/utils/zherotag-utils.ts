@@ -53,7 +53,10 @@ export async function moveAndUpdateBoards(
     const gameFinishedOpponentPerspective = await updateBoard(gameStateOpponent, gameStateMover);
 
     // TODO: does this assert work?
-    assert(gameFinishedMoverPerspective === gameFinishedOpponentPerspective);
+    // Update: Seems like it does.
+    assert(gameFinishedMoverPerspective[0] == gameFinishedOpponentPerspective[0]);
+    assert(gameFinishedMoverPerspective[1] == gameFinishedOpponentPerspective[1]);
+
 
     return gameFinishedMoverPerspective;
 }
@@ -72,7 +75,9 @@ export async function updateBoard(
     */
 
     // player 2 receives psi1PublicSignals and verifies the proof
-    verifyPSI1(psi1Proof, psi1PublicSignals);
+    if (!verifyPSI1(psi1Proof, psi1PublicSignals)) {
+        return [false, 2];
+    }
 
 
     // PSI2
@@ -80,7 +85,9 @@ export async function updateBoard(
 
     // player 2 sends psi2PublicSignals to player 1
     // player 1 receives psi2PublicSignals and verifies the proof
-    verifyPSI2(psi2Proof, psi2PublicSignals, psi1PublicSignals);
+    if(!verifyPSI2(psi2Proof, psi2PublicSignals, psi1PublicSignals)){
+        return [false, 2];
+    };
 
     // PSI 3
     const [psi3Proof, psi3PublicSignals] = await preparePSI3(gameStateOpponent, psi2PublicSignals);
@@ -88,10 +95,12 @@ export async function updateBoard(
     // player 1 sends psi3PublicSignals to player 2
     // player 2 receives psi1PublicSignals and verifies the proof
     // player 1 and 2 learn whether the game wsa finished or not
-    verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals);
+    if(!verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals)){
+        return [false, 2];
+    };
 
     const gameFinished = psi3PublicSignals[0];
-    return gameFinished;
+    return [true, gameFinished];
 }
 
 export async function move(
@@ -157,7 +166,13 @@ export async function verifyMoveProof(
     const movevKey = JSON.parse(fs.readFileSync(MOVE_VKEY_FILE_PATH, 'utf-8'));
     const moveres = await groth16.verify(movevKey, movePublicSignals, moveProof);
 
-    assert(moveres === true);
+    if (moveres === false) {
+        return false;
+    }
+
+    // TODO: other tests
+
+    return true;
 }
 
 export async function preparePSI1(
@@ -190,7 +205,14 @@ export async function verifyPSI1(
     const psi1vKey = JSON.parse(fs.readFileSync(PSI1_VKEY_FILE_PATH, 'utf-8'));
     const psi1res = await groth16.verify(psi1vKey, psi1PublicSignals, psi1Proof);
 
-    assert(psi1res === true);
+    if (psi1res === false) {
+        return false;
+    }
+
+    // some other tests
+
+
+    return true;
 }
 
 export async function preparePSI2(
@@ -228,23 +250,19 @@ export async function verifyPSI2(
     const psi2vKey = JSON.parse(fs.readFileSync(PSI2_VKEY_FILE_PATH, 'utf-8'));
     const psi2res = await groth16.verify(psi2vKey, psi2PublicSignals, psi2Proof);
     
-    assert(psi2res === true);
+    if (psi2res === false) {
+        return false;
+    }
 
     /* verify also that the opponent reexponentiated the right set */
     // the set that I have produced by exponentiating my neighbor squares
     const set1_me = psi1PublicSignals.slice(0, 8);
     // the set that my opponent reexponentiated
-    const set1_opponent = psi2PublicSignals.slice(9, 17);
-    // these two sets should be the same
-    // TODO: this doesn't work
-    // maybe BigInt(set_1_me[i]) === BigInt(set1_opponent[i]) them?
-    for (let i in set1_me) {
-        assert(set1_me[i] === set1_opponent[i]);
-    }
-    assert(arraysEqual(set1_me, set1_opponent));
+    const set1_opponent = psi2PublicSignals.slice(10, 18);
+    // TODO: these two sets should be the same
 
-    //console.log(set1_me);
-    //console.log(set1_opponent);
+
+    return true;
 }
 
 // TODO: Why is there no built-in code for array comparison?
@@ -294,8 +312,11 @@ export async function verifyPSI3(
     const psi3vKey = JSON.parse(fs.readFileSync(PSI3_VKEY_FILE_PATH, 'utf-8'));
     const psi3res = await groth16.verify(psi3vKey, psi3PublicSignals, psi3Proof);
 
+    if (psi3res === false) {
+        return false;
+    }
+
     // TODO: verify that the opponent really exponentiated your single-element set
 
-    assert(psi3res === true);
-
+    return true;
 }

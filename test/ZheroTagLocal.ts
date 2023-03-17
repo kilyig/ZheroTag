@@ -1,45 +1,5 @@
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { int } from "hardhat/internal/core/params/argumentTypes";
-import { BigNumber } from "ethers";
-import { groth16 } from "snarkjs";
-import fs from "fs";
-import {
-    GameState,
-    move,
-    prepareMoveProof,
-    verifyMoveProof,
-    preparePSI1,
-    verifyPSI1,
-    preparePSI2,
-    verifyPSI2,
-    preparePSI3,
-    verifyPSI3,
-    updateStateAfterOpponentMove,
-    moveAndUpdateBoards,
-} from "./utils/zherotag-utils";
-
-const MOVE_WASM_FILE_PATH = "circuits/move.wasm";
-const MOVE_ZKEY_FILE_PATH = "circuits/move.zkey";
-const MOVE_VKEY_FILE_PATH = "circuits/move.vkey.json";
-
-const PSI1_WASM_FILE_PATH = "circuits/psi1.wasm";
-const PSI1_ZKEY_FILE_PATH = "circuits/psi1.zkey";
-const PSI1_VKEY_FILE_PATH = "circuits/psi1.vkey.json";
-
-const PSI2_WASM_FILE_PATH = "circuits/psi2.wasm";
-const PSI2_ZKEY_FILE_PATH = "circuits/psi2.zkey";
-const PSI2_VKEY_FILE_PATH = "circuits/psi2.vkey.json";
-
-const PSI3_WASM_FILE_PATH = "circuits/psi3.wasm";
-const PSI3_ZKEY_FILE_PATH = "circuits/psi3.zkey";
-const PSI3_VKEY_FILE_PATH = "circuits/psi3.vkey.json";
-
-
-import { generateProof } from "./utils/snark-utils";
-import { assert } from "console";
+import { GameState, moveAndUpdateBoards } from "./utils/zherotag-utils";
 
 // x: 0 y: 0 salt: 12345
 // 2321794270632629049109131152230501273451975640760836008986566812209223148844
@@ -59,6 +19,7 @@ import { assert } from "console";
  * psi2PublicSignals[9]: posHash
  * psi2PublicSignals[10-17]: set1
  */
+
 describe("ZheroTagLocal", function () {
     // We define a fixture to reuse the same setup in every test.
     // We use loadFixture to run this setup once, snapshot that state,

@@ -1,5 +1,4 @@
 import { groth16 } from "snarkjs";
-import { ethers } from "hardhat";
 
 export async function generateProof(circuitInputs: any, filePathWASM: any, filePathZKEY: any) {
     //const file_wasm = fs.readFileSync(filePathWASM);

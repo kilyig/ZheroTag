@@ -1,4 +1,5 @@
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { randomExponent } from "./utils/math-utils";
 import { GameState, moveAndUpdateBoards } from "./utils/zherotag-utils";
 
 // x: 0 y: 0 salt: 12345
@@ -19,8 +20,8 @@ describe("ZheroTagLocal", function () {
             salt: 12345,
             posHash: BigInt("2321794270632629049109131152230501273451975640760836008986566812209223148844"),
             posHashOpponent: BigInt("9435539296313397007849595282098379346206722261888911142952399734225356376203"),
-            alpha: BigInt("0"),
-            beta: BigInt("0")
+            alpha: 39396,
+            beta: 84649
         };
 
         const blackGameState: GameState = {
@@ -29,8 +30,8 @@ describe("ZheroTagLocal", function () {
             salt: 12345,
             posHash: BigInt("9435539296313397007849595282098379346206722261888911142952399734225356376203"),
             posHashOpponent: BigInt("2321794270632629049109131152230501273451975640760836008986566812209223148844"),
-            alpha: BigInt("0"),
-            beta: BigInt("0")
+            alpha: 13273,
+            beta: 81963
         };
 
         return { whiteGameState, blackGameState };

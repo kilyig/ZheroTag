@@ -2,6 +2,7 @@ import { groth16 } from "snarkjs";
 import fs from "fs";
 import { assert } from "chai";
 import { generateProof } from "./snark-utils";
+import { randomExponent } from "./math-utils";
 
 
 const MOVE_WASM_FILE_PATH = "circuits/move.wasm";
@@ -42,7 +43,7 @@ const PSI3_VKEY_FILE_PATH = "circuits/psi3.vkey.json";
 export type GameState = {
     x: number,
     y: number,
-    salt: number,
+    salt: BigInt,
     posHash: BigInt,
     posHashOpponent: BigInt,
     alpha: BigInt,
@@ -67,6 +68,9 @@ export async function moveAndUpdateBoards(
         return [false, '2'];
     }
 
+    // console.log("movePublicSignals");
+    // console.log(movePublicSignals);
+
     // player 2 updates its "posHashOpponent"
     updateStateAfterOpponentMove(gameStateOpponent, movePublicSignals);
 
@@ -78,8 +82,7 @@ export async function moveAndUpdateBoards(
     // Update: Seems like it does.
     assert(gameFinishedMoverPerspective[0] == gameFinishedOpponentPerspective[0]);
     assert(gameFinishedMoverPerspective[1] == gameFinishedOpponentPerspective[1]);
-
-
+    
     return gameFinishedMoverPerspective;
 }
 
@@ -101,7 +104,6 @@ async function updateBoard(
         return [false, '2'];
     }
 
-
     // PSI2
     const [psi2Proof, psi2PublicSignals] = await preparePSI2(gameStateOpponent, psi1PublicSignals);
 
@@ -112,7 +114,7 @@ async function updateBoard(
     };
 
     // PSI 3
-    const [psi3Proof, psi3PublicSignals] = await preparePSI3(gameStateOpponent, psi2PublicSignals);
+    const [psi3Proof, psi3PublicSignals] = await preparePSI3(gameStateToUpdate, psi2PublicSignals);
 
     // player 1 sends psi3PublicSignals to player 2
     // player 2 receives psi1PublicSignals and verifies the proof
@@ -120,6 +122,15 @@ async function updateBoard(
     if(await verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals) === false){
         return [false, '2'];
     };
+
+    // console.log("psi1PublicSignals");
+    // console.log(psi1PublicSignals);
+
+    // console.log("psi2PublicSignals");
+    // console.log(psi2PublicSignals);
+
+    // console.log("psi3PublicSignals");
+    // console.log(psi3PublicSignals);
 
     const gameFinished = psi3PublicSignals[0];
     return [true, gameFinished];
@@ -130,8 +141,7 @@ async function move(
     xNew: number,
     yNew: number
 ) {
-    // TODO: make this random
-    const saltNew = Math.floor(Math.random() * 100000);
+    const saltNew = randomExponent();
 
     const [moveProof, movePublicSignals] = await prepareMoveProof(
         gameState,
@@ -159,7 +169,7 @@ async function prepareMoveProof(
     gameState: GameState,
     xNew: number,
     yNew: number,
-    saltNew: number
+    saltNew: BigInt
 ) {
     // player 1 starts by making a move
     const moveCircuitInputs = {
@@ -206,9 +216,7 @@ async function verifyMoveProof(
 async function preparePSI1(
     gameState: GameState,
 ) {
-    // TODO: this will be random in the near future
-    const alpha = BigInt("32457315139845");
-    gameState.alpha = alpha;
+    gameState.alpha = randomExponent();
 
     const psi1CircuitInputs = {
         x: gameState.x,
@@ -255,9 +263,7 @@ async function preparePSI2(
     gameState: GameState,
     psi1PublicSignals: any
 ) {
-    // TODO: this will be random in the near future
-    const beta = BigInt("32457315139845");
-    gameState.beta = beta;
+    gameState.beta = randomExponent();
 
     const set1 = psi1PublicSignals.slice(0, 8);
 

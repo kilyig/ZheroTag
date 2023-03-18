@@ -83,7 +83,7 @@ export async function moveAndUpdateBoards(
     return gameFinishedMoverPerspective;
 }
 
-export async function updateBoard(
+async function updateBoard(
     gameStateToUpdate: GameState,
     gameStateOpponent: GameState,
 ) {
@@ -125,7 +125,7 @@ export async function updateBoard(
     return [true, gameFinished];
 }
 
-export async function move(
+async function move(
     gameState: GameState,
     xNew: number,
     yNew: number
@@ -148,14 +148,14 @@ export async function move(
     return [moveProof, movePublicSignals];
 }
 
-export async function updateStateAfterOpponentMove(
+async function updateStateAfterOpponentMove(
     gameState: GameState,
     movePublicSignals: any
 ) {
     gameState.posHashOpponent = BigInt(movePublicSignals[0]);
 }
 
-export async function prepareMoveProof(
+async function prepareMoveProof(
     gameState: GameState,
     xNew: number,
     yNew: number,
@@ -180,7 +180,7 @@ export async function prepareMoveProof(
     return [moveProof, movePublicSignals];
 }
 
-export async function verifyMoveProof(
+async function verifyMoveProof(
     moveProof: any,
     movePublicSignals: any,
     gameState: GameState
@@ -203,7 +203,7 @@ export async function verifyMoveProof(
     return true;
 }
 
-export async function preparePSI1(
+async function preparePSI1(
     gameState: GameState,
 ) {
     // TODO: this will be random in the near future
@@ -226,7 +226,7 @@ export async function preparePSI1(
     return [psi1Proof, psi1PublicSignals];
 }
 
-export async function verifyPSI1(
+async function verifyPSI1(
     psi1Proof: any,
     psi1PublicSignals: any,
     gameState: GameState
@@ -251,7 +251,7 @@ export async function verifyPSI1(
     return true;
 }
 
-export async function preparePSI2(
+async function preparePSI2(
     gameState: GameState,
     psi1PublicSignals: any
 ) {
@@ -278,7 +278,7 @@ export async function preparePSI2(
     return [psi2Proof, psi2PublicSignals];
 }
 
-export async function verifyPSI2(
+async function verifyPSI2(
     psi2Proof: any,
     psi2PublicSignals: any,
     psi1PublicSignals: any
@@ -305,7 +305,7 @@ export async function verifyPSI2(
     return true;
 }
 
-export async function preparePSI3(
+async function preparePSI3(
     gameState: GameState,
     psi2PublicSignals: any
 ) {
@@ -326,7 +326,7 @@ export async function preparePSI3(
     return [psi3Proof, psi3PublicSignals];
 }
 
-export async function verifyPSI3(
+async function verifyPSI3(
     psi3Proof: any,
     psi3PublicSignals: any,
     psi2PublicSignals: any
@@ -362,3 +362,5 @@ export async function verifyPSI3(
 
     return true;
 }
+
+function 

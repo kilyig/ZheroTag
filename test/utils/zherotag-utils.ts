@@ -296,10 +296,8 @@ async function verifyPSI2(
     // the set that my opponent reexponentiated
     const set1_opponent = psi2PublicSignals.slice(10, 18);
     // TODO: these two sets should be the same
-    for (let i = 0; i < set1_me.length; i++) {
-        if (BigInt(set1_me[i]) !== BigInt(set1_opponent[i])) {
-            return false;
-        }
+    if(await PSISetsEqual(set1_me, set1_opponent) === false) {
+        return false;
     }
 
     return true;
@@ -342,19 +340,15 @@ async function verifyPSI3(
     const set2_me = psi2PublicSignals.slice(8, 9);
     const set2_opponent = psi3PublicSignals.slice(9, 10);
     // these two sets should be the same
-    for (let i = 0; i < set2_me.length; i++) {
-        if (BigInt(set2_me[i]) !== BigInt(set2_opponent[i])) {
-            return false;
-        }
+    if(await PSISetsEqual(set2_me, set2_opponent) === false) {
+        return false;
     }
 
     const set1_prime_me = psi2PublicSignals.slice(0, 8);
     const set1_prime_opponent = psi3PublicSignals.slice(1, 9);
     // verify that the 8-element set is what I had sent my opponent
-    for (let i = 0; i < set1_prime_me.length; i++) {
-        if (BigInt(set1_prime_me[i]) !== BigInt(set1_prime_opponent[i])) {
-            return false;
-        }
+    if(await PSISetsEqual(set1_prime_me, set1_prime_opponent) === false) {
+        return false;
     }
 
     // TODO: probably need to check that the mover used the same alpha
@@ -363,4 +357,15 @@ async function verifyPSI3(
     return true;
 }
 
-function 
+function PSISetsEqual(psi_set1: any, psi_set2: any) {
+    if (psi_set1.length !== psi_set2.length) {
+        return false;
+    }
+    for (let i = 0; i < psi_set1.length; i++) {
+        if (BigInt(psi_set1[i]) !== BigInt(psi_set2[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}

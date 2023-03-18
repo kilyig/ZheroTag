@@ -4,7 +4,6 @@ import { assert } from "chai";
 import { generateProof } from "./snark-utils";
 import { randomExponent } from "./math-utils";
 
-
 const MOVE_WASM_FILE_PATH = "circuits/move.wasm";
 const MOVE_ZKEY_FILE_PATH = "circuits/move.zkey";
 const MOVE_VKEY_FILE_PATH = "circuits/move.vkey.json";
@@ -20,6 +19,8 @@ const PSI2_VKEY_FILE_PATH = "circuits/psi2.vkey.json";
 const PSI3_WASM_FILE_PATH = "circuits/psi3.wasm";
 const PSI3_ZKEY_FILE_PATH = "circuits/psi3.zkey";
 const PSI3_VKEY_FILE_PATH = "circuits/psi3.vkey.json";
+
+const UNDEFINED_PSI_RETURN_VALUE = '2';
 
 /* inclusive boundaries:
  * psi1PublicSignals[0 - 7]: set1
@@ -39,6 +40,8 @@ const PSI3_VKEY_FILE_PATH = "circuits/psi3.vkey.json";
  * psi3PublicSignals[9]: set2
  */
 
+// sources: https://betterprogramming.pub/zero-knowledge-proofs-using-snarkjs-and-circom-fac6c4d63202
+//          ^^^^ for groth16.verify
 
 export type GameState = {
     x: number,
@@ -65,11 +68,8 @@ export async function moveAndUpdateBoards(
 
     // player 2 verifies that player 1's move was valid
     if (await verifyMoveProof(moveProof, movePublicSignals, gameStateOpponent) === false) {
-        return [false, '2'];
+        return [false, UNDEFINED_PSI_RETURN_VALUE];
     }
-
-    // console.log("movePublicSignals");
-    // console.log(movePublicSignals);
 
     // player 2 updates its "posHashOpponent"
     updateStateAfterOpponentMove(gameStateOpponent, movePublicSignals);
@@ -101,7 +101,7 @@ async function updateBoard(
 
     // player 2 receives psi1PublicSignals and verifies the proof
     if (await verifyPSI1(psi1Proof, psi1PublicSignals, gameStateOpponent) === false) {
-        return [false, '2'];
+        return [false, UNDEFINED_PSI_RETURN_VALUE];
     }
 
     // PSI2
@@ -110,7 +110,7 @@ async function updateBoard(
     // player 2 sends psi2PublicSignals to player 1
     // player 1 receives psi2PublicSignals and verifies the proof
     if(await verifyPSI2(psi2Proof, psi2PublicSignals, psi1PublicSignals) === false){
-        return [false, '2'];
+        return [false, UNDEFINED_PSI_RETURN_VALUE];
     };
 
     // PSI 3
@@ -120,17 +120,8 @@ async function updateBoard(
     // player 2 receives psi1PublicSignals and verifies the proof
     // player 1 and 2 learn whether the game wsa finished or not
     if(await verifyPSI3(psi3Proof, psi3PublicSignals, psi2PublicSignals) === false){
-        return [false, '2'];
+        return [false, UNDEFINED_PSI_RETURN_VALUE];
     };
-
-    // console.log("psi1PublicSignals");
-    // console.log(psi1PublicSignals);
-
-    // console.log("psi2PublicSignals");
-    // console.log(psi2PublicSignals);
-
-    // console.log("psi3PublicSignals");
-    // console.log(psi3PublicSignals);
 
     const gameFinished = psi3PublicSignals[0];
     return [true, gameFinished];
@@ -301,7 +292,7 @@ async function verifyPSI2(
     const set1_me = psi1PublicSignals.slice(0, 8);
     // the set that my opponent reexponentiated
     const set1_opponent = psi2PublicSignals.slice(10, 18);
-    // TODO: these two sets should be the same
+    // these two sets should be the same
     if(await PSISetsEqual(set1_me, set1_opponent) === false) {
         return false;
     }

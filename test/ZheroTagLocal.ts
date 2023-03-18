@@ -39,7 +39,7 @@ describe("ZheroTagLocal", function () {
     }
   
     describe("Move", function () {
-        it("10 moves with intersection", async function () {
+        it("8 moves with intersection", async function () {
             const { whiteGameState, blackGameState } = await loadFixture(gameStateFixture);
 
             expect(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 0)).to.eql([true, '0']);

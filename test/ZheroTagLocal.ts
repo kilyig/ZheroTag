@@ -42,14 +42,14 @@ describe("ZheroTagLocal", function () {
         it("10 moves with intersection", async function () {
             const { whiteGameState, blackGameState } = await loadFixture(gameStateFixture);
 
-            // console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 0));
-            // console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 4, 4));
-            // console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 1));
-            // console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 3, 3));
-            // console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 2, 2));
-            // console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 3));
-            // console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 3, 1));
-            // console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 2));
+            console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 0));
+            console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 4, 4));
+            console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 1));
+            console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 3, 3));
+            console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 2, 2));
+            console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 3));
+            console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 3, 1));
+            console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 2));
         });
 
         it("100 random moves", async function () {

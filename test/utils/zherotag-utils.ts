@@ -131,7 +131,7 @@ export async function move(
     yNew: number
 ) {
     // TODO: make this random
-    const saltNew = 12345;
+    const saltNew = Math.floor(Math.random() * 100000);
 
     const [moveProof, movePublicSignals] = await prepareMoveProof(
         gameState,
@@ -358,7 +358,7 @@ export async function verifyPSI3(
     }
 
     // TODO: probably need to check that the mover used the same alpha
-
+    // this requires changes in psi3.circom
 
     return true;
 }

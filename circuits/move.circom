@@ -62,6 +62,9 @@ template Move(numBits, boardSizeX, boardSizeY) {
 
     1 === yFinalCheck.out;
 
+    // TODO: ensure that the player has moved. that is, staying in your position
+    // should not count as a valid move. or maybe it should? skip for now.
+
     // check that the new position is within the board's bounds
     component boardXCheck = LessThan(numBits);
     boardXCheck.in[0] <== xNew;

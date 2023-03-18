@@ -8,18 +8,6 @@ import { GameState, moveAndUpdateBoards } from "./utils/zherotag-utils";
 // x: 5 y: 5 salt: 12345
 // 9435539296313397007849595282098379346206722261888911142952399734225356376203
 
-/* inclusive boundaries:
- * psi1PublicSignals[0 - 7]: set1
- * psi1PublicSignals[8]: posHash
- */
-
-/* inclusive boundaries:
- * psi2PublicSignals[0 - 7]: set1_prime
- * psi2PublicSignals[8]: set2
- * psi2PublicSignals[9]: posHash
- * psi2PublicSignals[10-17]: set1
- */
-
 describe("ZheroTagLocal", function () {
     // We define a fixture to reuse the same setup in every test.
     // We use loadFixture to run this setup once, snapshot that state,

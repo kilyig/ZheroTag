@@ -20,6 +20,25 @@ const PSI3_WASM_FILE_PATH = "circuits/psi3.wasm";
 const PSI3_ZKEY_FILE_PATH = "circuits/psi3.zkey";
 const PSI3_VKEY_FILE_PATH = "circuits/psi3.vkey.json";
 
+/* inclusive boundaries:
+ * psi1PublicSignals[0 - 7]: set1
+ * psi1PublicSignals[8]: posHash
+ */
+
+/* inclusive boundaries:
+ * psi2PublicSignals[0 - 7]: set1_prime
+ * psi2PublicSignals[8]: set2
+ * psi2PublicSignals[9]: posHash
+ * psi2PublicSignals[10-17]: set1
+ */
+
+/* inclusive boundaries:
+ * psi3PublicSignals[0]: game_finished
+ * psi3PublicSignals[1-8]: set1_prime
+ * psi3PublicSignals[9]: set2
+ */
+
+
 export type GameState = {
     x: number,
     y: number,
@@ -78,7 +97,7 @@ export async function updateBoard(
     */
 
     // player 2 receives psi1PublicSignals and verifies the proof
-    if (await verifyPSI1(psi1Proof, psi1PublicSignals) === false) {
+    if (await verifyPSI1(psi1Proof, psi1PublicSignals, gameStateOpponent) === false) {
         return [false, '2'];
     }
 
@@ -209,7 +228,8 @@ export async function preparePSI1(
 
 export async function verifyPSI1(
     psi1Proof: any,
-    psi1PublicSignals: any
+    psi1PublicSignals: any,
+    gameState: GameState
 ) {
     const psi1vKey = JSON.parse(fs.readFileSync(PSI1_VKEY_FILE_PATH, 'utf-8'));
     const psi1res = await groth16.verify(psi1vKey, psi1PublicSignals, psi1Proof);
@@ -218,8 +238,15 @@ export async function verifyPSI1(
         return false;
     }
 
-    // some other tests
+    // the 8-element set should be generated from the Moore neighbors of
+    // **my opponent's current position**.
+    const posHashZKP = BigInt(psi1PublicSignals[8]);
+    if(posHashZKP !== gameState.posHashOpponent) {
+        return false;
+    }
 
+    // TODO: probably need to record a hash commitment to alpha
+    // to later check that the mover used the same alpha
 
     return true;
 }
@@ -269,28 +296,14 @@ export async function verifyPSI2(
     // the set that my opponent reexponentiated
     const set1_opponent = psi2PublicSignals.slice(10, 18);
     // TODO: these two sets should be the same
-
+    for (let i = 0; i < set1_me.length; i++) {
+        if (BigInt(set1_me[i]) !== BigInt(set1_opponent[i])) {
+            return false;
+        }
+    }
 
     return true;
 }
-
-// TODO: Why is there no built-in code for array comparison?
-// https://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript
-function arraysEqual(a: any, b: any) {
-    if (a === b) return true;
-    if (a == null || b == null) return false;
-    if (a.length !== b.length) return false;
-  
-    // If you don't care about the order of the elements inside
-    // the array, you should sort both arrays here.
-    // Please note that calling sort on an array will modify that array.
-    // you might want to clone your array first.
-  
-    for (var i = 0; i < a.length; ++i) {
-      if (a[i] !== b[i]) return false;
-    }
-    return true;
-  }
 
 export async function preparePSI3(
     gameState: GameState,
@@ -325,7 +338,27 @@ export async function verifyPSI3(
         return false;
     }
 
-    // TODO: verify that the opponent really exponentiated your single-element set
+    // verify that the opponent really exponentiated your single-element set
+    const set2_me = psi2PublicSignals.slice(8, 9);
+    const set2_opponent = psi3PublicSignals.slice(9, 10);
+    // these two sets should be the same
+    for (let i = 0; i < set2_me.length; i++) {
+        if (BigInt(set2_me[i]) !== BigInt(set2_opponent[i])) {
+            return false;
+        }
+    }
+
+    const set1_prime_me = psi2PublicSignals.slice(0, 8);
+    const set1_prime_opponent = psi3PublicSignals.slice(1, 9);
+    // verify that the 8-element set is what I had sent my opponent
+    for (let i = 0; i < set1_prime_me.length; i++) {
+        if (BigInt(set1_prime_me[i]) !== BigInt(set1_prime_opponent[i])) {
+            return false;
+        }
+    }
+
+    // TODO: probably need to check that the mover used the same alpha
+
 
     return true;
 }

@@ -2,7 +2,7 @@ import { groth16 } from "snarkjs";
 import fs from "fs";
 import { assert } from "chai";
 import { generateProof } from "./snark-utils";
-import { randomExponent } from "./math-utils";
+import { randomExponent, allMoveDeltas } from "./math-utils";
 
 const MOVE_WASM_FILE_PATH = "circuits/move.wasm";
 const MOVE_ZKEY_FILE_PATH = "circuits/move.zkey";
@@ -35,9 +35,8 @@ const UNDEFINED_PSI_RETURN_VALUE = '2';
  */
 
 /* inclusive boundaries:
- * psi3PublicSignals[0]: game_finished
- * psi3PublicSignals[1-8]: set1_prime
- * psi3PublicSignals[9]: set2
+ * psi3PublicSignals[0]: set2_prime
+ * psi3PublicSignals[1]: set2
  */
 
 // sources: https://betterprogramming.pub/zero-knowledge-proofs-using-snarkjs-and-circom-fac6c4d63202
@@ -116,6 +115,7 @@ async function updateBoard(
     // PSI 3
     const [psi3Proof, psi3PublicSignals] = await preparePSI3(gameStateToUpdate, psi2PublicSignals);
 
+    // optional:
     // player 1 sends psi3PublicSignals to player 2
     // player 2 receives psi1PublicSignals and verifies the proof
     // player 1 and 2 learn whether the game wsa finished or not
@@ -123,8 +123,26 @@ async function updateBoard(
         return [false, UNDEFINED_PSI_RETURN_VALUE];
     };
 
-    const gameFinished = psi3PublicSignals[0];
+    const gameFinished = calculateGameFinished(psi3PublicSignals, psi2PublicSignals);
     return [true, gameFinished];
+}
+
+async function calculateGameFinished(
+    psi3PublicSignals: any,
+    psi2PublicSignals: any
+) {
+    const set2_prime = psi3PublicSignals.slice(0, 1);
+    const set1_prime = psi2PublicSignals.slice(0, 8);
+
+    // check if there is an element in the intersection of the two sets
+    const intersectionIndex = PSISetsFindIntersection(set2_prime, set1_prime);
+    if (intersectionIndex === -1) {
+        return [false, undefined];
+    }
+
+    // now that we know the sets intersect, find the opponent's position
+    
+
 }
 
 async function move(
@@ -335,16 +353,9 @@ async function verifyPSI3(
 
     // verify that the opponent really exponentiated your single-element set
     const set2_me = psi2PublicSignals.slice(8, 9);
-    const set2_opponent = psi3PublicSignals.slice(9, 10);
+    const set2_opponent = psi3PublicSignals.slice(1, 2);
     // these two sets should be the same
     if(await PSISetsEqual(set2_me, set2_opponent) === false) {
-        return false;
-    }
-
-    const set1_prime_me = psi2PublicSignals.slice(0, 8);
-    const set1_prime_opponent = psi3PublicSignals.slice(1, 9);
-    // verify that the 8-element set is what I had sent my opponent
-    if(await PSISetsEqual(set1_prime_me, set1_prime_opponent) === false) {
         return false;
     }
 
@@ -365,4 +376,15 @@ function PSISetsEqual(psi_set1: any, psi_set2: any) {
     }
 
     return true;
+}
+
+// we assume here that psi_set2 is a single-element set
+function PSISetsFindIntersection(psi_set1: any, psi_set2: any) {
+    for (let i = 0; i < psi_set1.length; i++) {
+        if (BigInt(psi_set1[i]) === BigInt(psi_set2[0])) {
+            return i;
+        }
+    }
+
+    return -1;
 }

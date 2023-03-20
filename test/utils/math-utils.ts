@@ -38,9 +38,6 @@ export function randMove(xOld: number, yOld: number, xOpponent: number, yOpponen
         }
     }
 
-    // console.log("xNew:", xOld, "yNew:", yOld);
-    // console.log(allowedMoveDeltas);
-
     // now randomly pick one among them
     const randIndex = randomIntFromInterval(0, allowedMoveDeltas.length - 1);
     return allowedMoveDeltas[randIndex];

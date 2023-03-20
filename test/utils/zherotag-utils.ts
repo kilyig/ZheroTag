@@ -1,6 +1,5 @@
 import { groth16 } from "snarkjs";
 import fs from "fs";
-import { assert } from "chai";
 import { generateProof } from "./snark-utils";
 import { randomExponent, allMoveDeltas } from "./math-utils";
 
@@ -77,11 +76,6 @@ export async function moveAndUpdateBoards(
     // now update both boards
     const gameFinishedMoverPerspective = await updateBoard(gameStateMover, gameStateOpponent);
     const gameFinishedOpponentPerspective = await updateBoard(gameStateOpponent, gameStateMover);
-
-    // TODO: does this assert work?
-    // Update: Seems like it does.
-    //assert(gameFinishedMoverPerspective[0] == gameFinishedOpponentPerspective[0]);
-    //assert(gameFinishedMoverPerspective[1] == gameFinishedOpponentPerspective[1]);
     
     return [gameFinishedMoverPerspective, gameFinishedOpponentPerspective];
 }

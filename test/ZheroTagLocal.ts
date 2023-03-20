@@ -1,4 +1,4 @@
-import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { randMove } from "./utils/math-utils";
 import { GameState, moveAndUpdateBoards } from "./utils/zherotag-utils";
@@ -53,7 +53,7 @@ describe("ZheroTagLocal", function () {
                 [2, 2]
             ];
 
-            //await testMoves(moves, whiteGameState, blackGameState);
+            await testMoves(moves, whiteGameState, blackGameState);
         });
 
         it("100 random moves", async function () {
@@ -107,13 +107,6 @@ describe("ZheroTagLocal", function () {
             let correctMoveSucceeds = true;
             let canSeeEachOther = false;
 
-            // this is only necessary if our random move generator is allowed to generate invalid moves
-            // // if the random move goes out of bounds, the move proof can't be generated
-            // if (xNew > 5 || xNew < 0 || yNew > 5 || yNew < 0) {
-            //     moveSucceeds = false;
-            //     PSIOutput = '2';
-            // }
-
             // The PSI is supposed to output '1' iff the kings are next to each other
             // note that we are using xNew instead of moverGameState.x because moverGameState.x hasn't been updated yet
             const xDiff = Math.abs(xNew - opponentGameState.x);
@@ -127,9 +120,6 @@ describe("ZheroTagLocal", function () {
             const moverResult = result[0];
             const opponentResult = result[1];
 
-            // console.log(result);
-            // console.log(moverResult);
-            // console.log(opponentResult);
             /* check if the actual and expected values match */
             // the players should agree that the the move + PSI process was okay/not okay.
             expect(moverResult[0]).to.equal(correctMoveSucceeds);
@@ -146,7 +136,6 @@ describe("ZheroTagLocal", function () {
             }
 
 
-            //expect(PSIOutput).to.equal(correctPSIOutput);
             // just some code wizardy to print the correct values for "W sees B @" and "W sees B @"
             let last_str = "";
             if (i % 2 === 0) {

@@ -10,7 +10,7 @@ template PSI1(num_bits) {
     signal input posHash;
     signal input alpha;
 
-    signal output set1[8];
+    signal output set1_alpha[8];
 
     component hashChecker = Poseidon(3);
     hashChecker.inputs[0] <== x;
@@ -32,7 +32,7 @@ template PSI1(num_bits) {
         set1_setElementExponentiators[i] = SetElementExponentiator(num_bits);
         set1_setElementExponentiators[i].setElement <== set1_coordCombiners[i].combined;
         set1_setElementExponentiators[i].exponent <== alpha;
-        set1[i] <== set1_setElementExponentiators[i].setElementExponentiated;
+        set1_alpha[i] <== set1_setElementExponentiators[i].setElementExponentiated;
     }
 }
 

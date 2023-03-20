@@ -23,21 +23,21 @@ const PSI3_VKEY_FILE_PATH = "circuits/psi3.vkey.json";
 const UNDEFINED_PSI_RETURN_VALUE = '2';
 
 /* inclusive boundaries:
- * psi1PublicSignals[0 - 7]: set1
+ * psi1PublicSignals[0 - 7]: set1_alpha
  * psi1PublicSignals[8]: posHash
  */
 
 /* inclusive boundaries:
- * psi2PublicSignals[0 - 7]: set1_prime
- * psi2PublicSignals[8]: set2
+ * psi2PublicSignals[0 - 7]: set1_alpha_beta
+ * psi2PublicSignals[8]: set2_beta
  * psi2PublicSignals[9]: posHash
- * psi2PublicSignals[10-17]: set1
+ * psi2PublicSignals[10-17]: set1_alpha
  */
 
 /* inclusive boundaries:
  * psi3PublicSignals[0]: game_finished
- * psi3PublicSignals[1-8]: set1_prime
- * psi3PublicSignals[9]: set2
+ * psi3PublicSignals[1-8]: set1_alpha_beta
+ * psi3PublicSignals[9]: set2_beta
  */
 
 // sources: https://betterprogramming.pub/zero-knowledge-proofs-using-snarkjs-and-circom-fac6c4d63202
@@ -270,7 +270,7 @@ async function preparePSI2(
 ) {
     gameState.beta = randomExponent();
 
-    const set1 = psi1PublicSignals.slice(0, 8);
+    const set1_alpha = psi1PublicSignals.slice(0, 8);
 
     const psi2CircuitInputs = {
         x: gameState.x,
@@ -278,7 +278,7 @@ async function preparePSI2(
         salt: gameState.salt,
         posHash: gameState.posHash,
         beta: gameState.beta,
-        set1: set1
+        set1_alpha: set1_alpha
     }
     const [psi2Proof, psi2PublicSignals] = await generateProof(
         psi2CircuitInputs,
@@ -303,11 +303,11 @@ async function verifyPSI2(
 
     /* verify also that the opponent reexponentiated the right set */
     // the set that I have produced by exponentiating my neighbor squares
-    const set1_me = psi1PublicSignals.slice(0, 8);
+    const set1_alpha_me = psi1PublicSignals.slice(0, 8);
     // the set that my opponent reexponentiated
-    const set1_opponent = psi2PublicSignals.slice(10, 18);
+    const set1_alpha_opponent = psi2PublicSignals.slice(10, 18);
     // these two sets should be the same
-    if(await PSISetsEqual(set1_me, set1_opponent) === false) {
+    if(await PSISetsEqual(set1_alpha_me, set1_alpha_opponent) === false) {
         return false;
     }
 
@@ -318,13 +318,13 @@ async function preparePSI3(
     gameState: GameState,
     psi2PublicSignals: any
 ) {
-    const set1_prime = psi2PublicSignals.slice(0, 8);
-    const set2 = psi2PublicSignals.slice(8, 9);
+    const set1_alpha_beta = psi2PublicSignals.slice(0, 8);
+    const set2_beta = psi2PublicSignals.slice(8, 9);
 
     const psi3CircuitInputs = {
         alpha: gameState.alpha,
-        set1_prime: set1_prime,
-        set2: set2
+        set1_alpha_beta: set1_alpha_beta,
+        set2_beta: set2_beta
     }
     const [psi3Proof, psi3PublicSignals] = await generateProof(
         psi3CircuitInputs,
@@ -348,17 +348,17 @@ async function verifyPSI3(
     }
 
     // verify that the opponent really exponentiated your single-element set
-    const set2_me = psi2PublicSignals.slice(8, 9);
-    const set2_opponent = psi3PublicSignals.slice(9, 10);
+    const set2_beta_me = psi2PublicSignals.slice(8, 9);
+    const set2_beta_opponent = psi3PublicSignals.slice(9, 10);
     // these two sets should be the same
-    if(await PSISetsEqual(set2_me, set2_opponent) === false) {
+    if(await PSISetsEqual(set2_beta_me, set2_beta_opponent) === false) {
         return false;
     }
 
-    const set1_prime_me = psi2PublicSignals.slice(0, 8);
-    const set1_prime_opponent = psi3PublicSignals.slice(1, 9);
+    const set1_alpha_beta_me = psi2PublicSignals.slice(0, 8);
+    const set1_alpha_beta_opponent = psi3PublicSignals.slice(1, 9);
     // verify that the 8-element set is what I had sent my opponent
-    if(await PSISetsEqual(set1_prime_me, set1_prime_opponent) === false) {
+    if(await PSISetsEqual(set1_alpha_beta_me, set1_alpha_beta_opponent) === false) {
         return false;
     }
 

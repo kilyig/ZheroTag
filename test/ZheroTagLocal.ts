@@ -1,6 +1,6 @@
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { randMoveDelta } from "./utils/math-utils";
+import { randMove } from "./utils/math-utils";
 import { GameState, moveAndUpdateBoards } from "./utils/zherotag-utils";
 
 // x: 0 y: 0 salt: 12345
@@ -42,79 +42,39 @@ describe("ZheroTagLocal", function () {
         it("8 moves with intersection", async function () {
             const { whiteGameState, blackGameState } = await loadFixture(gameStateFixture);
 
-            console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 0));
-            console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 4, 4));
-            console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 1));
-            console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 3, 3));
-            console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 2, 2));
-            console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 3));
-            console.log(await moveAndUpdateBoards(whiteGameState, blackGameState, 3, 1));
-            console.log(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 2));
+            const moves = [
+                [1, 0],
+                [4, 4],
+                [1, 1],
+                [3, 3],
+                [2, 2],
+                [2, 3],
+                [3, 1],
+                [2, 2]
+            ];
 
-
-            // expect(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 0)).to.eql([true, '0']);
-            // expect(await moveAndUpdateBoards(blackGameState, whiteGameState, 4, 4)).to.eql([true, '0']);
-            // expect(await moveAndUpdateBoards(whiteGameState, blackGameState, 1, 1)).to.eql([true, '0']);
-            // expect(await moveAndUpdateBoards(blackGameState, whiteGameState, 3, 3)).to.eql([true, '0']);
-            // expect(await moveAndUpdateBoards(whiteGameState, blackGameState, 2, 2)).to.eql([true, '1']);
-            // expect(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 3)).to.eql([true, '1']);
-            // expect(await moveAndUpdateBoards(whiteGameState, blackGameState, 3, 1)).to.eql([true, '0']);
-            // expect(await moveAndUpdateBoards(blackGameState, whiteGameState, 2, 2)).to.eql([true, '1']);
+            //await testMoves(moves, whiteGameState, blackGameState);
         });
 
         it("100 random moves", async function () {
             const { whiteGameState, blackGameState } = await loadFixture(gameStateFixture);
 
-            let moverGameState = whiteGameState;
-            let opponentGameState = blackGameState;
+            // TODO: for some reason, this test starts at the positions that test 1 ends at. why?
+            let moves = [];
 
-            console.log("Initial positions: " + "W: (" + whiteGameState.x + ", " + whiteGameState.y + ")" + ", B: (" + blackGameState.x + ", " + blackGameState.y + ")");
-
+            // sample 100 valid moves
+            let [xMover, yMover] = [whiteGameState.x, whiteGameState.y];
+            let [xOpponent, yOpponent] = [blackGameState.x, blackGameState.y];
             for (let i = 0; i < 100; i++) {
-                let delta = randMoveDelta(moverGameState.x, moverGameState.y, opponentGameState.x, opponentGameState.y);
-                let xNew = moverGameState.x + delta[0];
-                let yNew = moverGameState.y + delta[1];
+                moves.push(randMove(xMover, yMover, xOpponent, yOpponent));
 
-                console.log("Attempting to move to (" + xNew + ", " + yNew + ")");
-
-                /* calculate the expected outcome of the PSI */
-                let correctMoveSucceeds = true;
-                let correctPSIOutput = '0';
-
-                // this is only necessary if our random move generator is allowed to generate invalid moves
-                // // if the random move goes out of bounds, the move proof can't be generated
-                // if (xNew > 5 || xNew < 0 || yNew > 5 || yNew < 0) {
-                //     moveSucceeds = false;
-                //     PSIOutput = '2';
-                // }
-
-                // The PSI is supposed to output '1' iff the kings are next to each other
-                // note that we are using xNew instead of moverGameState.x because moverGameState.x hasn't been updated yet
-                const xDiff = Math.abs(xNew - opponentGameState.x);
-                const yDiff = Math.abs(yNew - opponentGameState.y);
-                if (xDiff <= 1 && yDiff <= 1) {
-                    correctPSIOutput = '1';
-                }
-
-                // actually execute the move and get the output of PSI
-                const result = await moveAndUpdateBoards(moverGameState, opponentGameState, xNew, yNew);
-                const moverResult = result[0];
-                const opponentResult = result[1];
-
-                // console.log(moverResult);
-                // console.log(opponentResult);
-                // check if the actual and expected values match
-                //expect(moverResult[0]).to.equal(correctMoveSucceeds);
-                //expect(PSIOutput).to.equal(correctPSIOutput);
-
-                // swap the states because the other player will move in the next round
-                let temp = moverGameState;
-                moverGameState = opponentGameState;
-                opponentGameState = temp;
-
-                const last_str = "After move " + (i+1) + ": " + "W: (" + whiteGameState.x + ", " + whiteGameState.y + ")" + ", B: (" + blackGameState.x + ", " + blackGameState.y + ")" + ", PSI output: ";
-                console.log(last_str, moverResult, opponentResult);
+                [xMover, yMover] = [xOpponent, yOpponent];
+                [xOpponent, yOpponent] = moves[moves.length-1];
             }
+
+            console.log(moves);
+
+            await testMoves(moves, whiteGameState, blackGameState);
         });
 
         it("Moving outside the board", async function () {
@@ -122,4 +82,84 @@ describe("ZheroTagLocal", function () {
             // move to a square outside the boundaries of the board
         });
     });
+
+    async function testMoves(
+        positions: any[],
+        gameState1: GameState,
+        gameState2: GameState
+    ) {
+        let moverGameState = gameState1;
+        let opponentGameState = gameState2;
+
+        console.log("Initial positions: " + "W: (" + gameState1.x + ", " + gameState1.y + ")" + ", B: (" + gameState2.x + ", " + gameState2.y + ")");
+
+        for (let i = 0; i < positions.length; i++) {
+            let xNew = positions[i][0];
+            let yNew = positions[i][1];
+
+            if (i % 2 === 0) {
+                console.log("W moves to (" + xNew + ", " + yNew + ")");
+            } else {
+                console.log("B moves to (" + xNew + ", " + yNew + ")");
+            }
+
+            /* calculate the expected outcome of the PSI */
+            let correctMoveSucceeds = true;
+            let canSeeEachOther = false;
+
+            // this is only necessary if our random move generator is allowed to generate invalid moves
+            // // if the random move goes out of bounds, the move proof can't be generated
+            // if (xNew > 5 || xNew < 0 || yNew > 5 || yNew < 0) {
+            //     moveSucceeds = false;
+            //     PSIOutput = '2';
+            // }
+
+            // The PSI is supposed to output '1' iff the kings are next to each other
+            // note that we are using xNew instead of moverGameState.x because moverGameState.x hasn't been updated yet
+            const xDiff = Math.abs(xNew - opponentGameState.x);
+            const yDiff = Math.abs(yNew - opponentGameState.y);
+            if (xDiff <= 1 && yDiff <= 1) {
+                canSeeEachOther = true;
+            }
+
+            // actually execute the move and get the output of PSI
+            const result = await moveAndUpdateBoards(moverGameState, opponentGameState, xNew, yNew);
+            const moverResult = result[0];
+            const opponentResult = result[1];
+
+            // console.log(result);
+            // console.log(moverResult);
+            // console.log(opponentResult);
+            /* check if the actual and expected values match */
+            // the players should agree that the the move + PSI process was okay/not okay.
+            expect(moverResult[0]).to.equal(correctMoveSucceeds);
+            expect(opponentResult[0]).to.equal(correctMoveSucceeds);
+
+            // they should correctly calculate the opponent's position if 
+            // the PSI reveals an intersection
+            if (canSeeEachOther) {
+                expect(moverResult[1]).to.eql([opponentGameState.x, opponentGameState.y]);
+                expect(opponentResult[1]).to.eql([xNew, yNew]);
+            } else {
+                expect(moverResult[1]).to.eql(undefined);
+                expect(opponentResult[1]).to.eql(undefined);
+            }
+
+
+            //expect(PSIOutput).to.equal(correctPSIOutput);
+            // just some code wizardy to print the correct values for "W sees B @" and "W sees B @"
+            let last_str = "";
+            if (i % 2 === 0) {
+                last_str = "After move " + (i+1) + ": " + "W: (" + gameState1.x + ", " + gameState1.y + ")" + ", B: (" + gameState2.x + ", " + gameState2.y + ")" + ", PSI output: " + "W sees B @ (" + moverResult[1] + "), B sees W @ (" + opponentResult[1] + ")";
+            } else {
+                last_str = "After move " + (i+1) + ": " + "W: (" + gameState1.x + ", " + gameState1.y + ")" + ", B: (" + gameState2.x + ", " + gameState2.y + ")" + ", PSI output: " + "W sees B @ (" + opponentResult[1] + "), B sees W @ (" + moverResult[1] + ")";
+            }
+            console.log(last_str);
+
+            // swap the states because the other player will move in the next round
+            let temp = moverGameState;
+            moverGameState = opponentGameState;
+            opponentGameState = temp;
+        }
+    }
 });

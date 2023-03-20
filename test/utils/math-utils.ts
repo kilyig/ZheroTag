@@ -17,7 +17,7 @@ export function randomExponent() {
     return BigNumber.from(randomHex).toBigInt();
 }
 
-export function randMoveDelta(xOld: number, yOld: number, xOpponent: number, yOpponent: number) {
+export function randMove(xOld: number, yOld: number, xOpponent: number, yOpponent: number) {
     function checkBounds(delta: any, xOld: number, yOld: number) {
         const xNew = xOld + delta[0];
         const yNew = yOld + delta[1];
@@ -33,7 +33,7 @@ export function randMoveDelta(xOld: number, yOld: number, xOpponent: number, yOp
         if (checkBounds(allMoveDeltas[i], xOld, yOld)) {
             // prevent the player from moving to the same square as its opponent
             if (xOld + allMoveDeltas[i][0] !== xOpponent || yOld + allMoveDeltas[i][1] !== yOpponent) {
-                allowedMoveDeltas.push(allMoveDeltas[i]);
+                allowedMoveDeltas.push([xOld + allMoveDeltas[i][0], yOld + allMoveDeltas[i][1]]);
             }
         }
     }
@@ -47,7 +47,7 @@ export function randMoveDelta(xOld: number, yOld: number, xOpponent: number, yOp
 }
 
 
-export function randMoveNoChecks() {
+export function randMoveDeltaNoChecks() {
     let xDelta = randomIntFromInterval(0, 2) - 1;
     let yDelta;
     if (xDelta === 0) {

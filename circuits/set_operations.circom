@@ -6,9 +6,11 @@ include "./algebra.circom";
  * Let P be the given coordinate. The sets visiblesX and visiblesY
  * have the following order:
  * 
- *      [0][3][5]
- *      [1][P][6]
- *      [2][4][7]
+ *        ---> y
+ *    |  [0][3][5]
+ *    |  [1][P][6]
+ *    v  [2][4][7]
+ *    x
  */
 template VisibleSquares() {
     signal input x;

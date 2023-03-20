@@ -1,7 +1,7 @@
 import { groth16 } from "snarkjs";
 import fs from "fs";
 import { generateProof } from "./snark-utils";
-import { randomExponent, allMoveDeltas } from "./math-utils";
+import { randomExponent, randomSalt, allMoveDeltas } from "./math-utils";
 
 const MOVE_WASM_FILE_PATH = "circuits/move.wasm";
 const MOVE_ZKEY_FILE_PATH = "circuits/move.zkey";
@@ -19,7 +19,7 @@ const PSI3_WASM_FILE_PATH = "circuits/psi3.wasm";
 const PSI3_ZKEY_FILE_PATH = "circuits/psi3.zkey";
 const PSI3_VKEY_FILE_PATH = "circuits/psi3.vkey.json";
 
-const UNDEFINED_PSI_RETURN_VALUE = '2';
+const UNDEFINED_PSI_RETURN_VALUE = undefined;
 
 /* inclusive boundaries:
  * psi1PublicSignals[0 - 7]: set1_alpha
@@ -67,7 +67,7 @@ export async function moveAndUpdateBoards(
 
     // player 2 verifies that player 1's move was valid
     if (await verifyMoveProof(moveProof, movePublicSignals, gameStateOpponent) === false) {
-        return [false, UNDEFINED_PSI_RETURN_VALUE];
+        return [[false, UNDEFINED_PSI_RETURN_VALUE], [false, UNDEFINED_PSI_RETURN_VALUE]];
     }
 
     // player 2 updates its "posHashOpponent"
@@ -140,7 +140,7 @@ async function move(
     xNew: number,
     yNew: number
 ) {
-    const saltNew = randomExponent();
+    const saltNew = randomSalt();
 
     const [moveProof, movePublicSignals] = await prepareMoveProof(
         gameState,

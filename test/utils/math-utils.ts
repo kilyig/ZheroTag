@@ -17,6 +17,10 @@ export function randomExponent() {
     return BigNumber.from(randomHex).toBigInt();
 }
 
+export function randomSalt() {
+    return randomExponent();
+}
+
 export function randMove(xOld: number, yOld: number, xOpponent: number, yOpponent: number) {
     function checkBounds(delta: any, xOld: number, yOld: number) {
         const xNew = xOld + delta[0];

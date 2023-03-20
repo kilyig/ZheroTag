@@ -2,7 +2,14 @@ pragma circom 2.0.0;
 
 include "./algebra.circom";
 
-// returns the Moore neighbors of the given coordinate
+/* returns the Moore neighbors of the given coordinate
+ * Let P be the given coordinate. The sets visiblesX and visiblesY
+ * have the following order:
+ * 
+ *      [0][3][5]
+ *      [1][P][6]
+ *      [2][4][7]
+ */
 template VisibleSquares() {
     signal input x;
     signal input y;

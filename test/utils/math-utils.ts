@@ -1,5 +1,16 @@
 import { BigNumber, utils } from "ethers";
 
+export const allMoveDeltas = [
+    [-1, -1],
+    [0, -1],
+    [1, -1],
+    [-1, 0],
+    [1, 0],
+    [-1, 1],
+    [0, 1],
+    [1, 1],
+];
+
 // inspired from https://github.com/sigmachirality/empty-house/blob/main/frontend/src/utils/sampler.ts
 export function randomExponent() {
     const randomHex = utils.randomBytes(8);
@@ -15,17 +26,6 @@ export function randMoveDelta(xOld: number, yOld: number, xOpponent: number, yOp
         }
         return true;
     }
-
-    let allMoveDeltas = [
-        [-1, -1],
-        [-1, 0],
-        [-1, 1],
-        [0, -1],
-        [0, 1],
-        [1, -1],
-        [1, 0],
-        [1, 1],
-    ];
 
     // filter out those that go out of bounds on the board
     let allowedMoveDeltas = [];

@@ -30,7 +30,7 @@ template PSI3(num_bits) {
         is_same_element[i] = IsEqual();
         is_same_element[i].in[0] <== set2_prime[0];
         is_same_element[i].in[1] <== set1_prime[i];
-        cumulative_intersection_size[i+1] <== cumulative_intersection_size[i] + is_same_element[i].out;
+        cumulative_intersection_size[i+1] <== cumulative_intersection_size[i] + (i+1) * is_same_element[i].out;
     }
 
     game_finished <== cumulative_intersection_size[8];

@@ -2,7 +2,7 @@ import { groth16 } from "snarkjs";
 import fs from "fs";
 import { assert } from "chai";
 import { generateProof } from "./snark-utils";
-import { randomExponent } from "./math-utils";
+import { randomExponent, allMoveDeltas } from "./math-utils";
 
 const MOVE_WASM_FILE_PATH = "circuits/move.wasm";
 const MOVE_ZKEY_FILE_PATH = "circuits/move.zkey";
@@ -80,10 +80,10 @@ export async function moveAndUpdateBoards(
 
     // TODO: does this assert work?
     // Update: Seems like it does.
-    assert(gameFinishedMoverPerspective[0] == gameFinishedOpponentPerspective[0]);
-    assert(gameFinishedMoverPerspective[1] == gameFinishedOpponentPerspective[1]);
+    //assert(gameFinishedMoverPerspective[0] == gameFinishedOpponentPerspective[0]);
+    //assert(gameFinishedMoverPerspective[1] == gameFinishedOpponentPerspective[1]);
     
-    return gameFinishedMoverPerspective;
+    return [gameFinishedMoverPerspective, gameFinishedOpponentPerspective];
 }
 
 async function updateBoard(
@@ -123,8 +123,22 @@ async function updateBoard(
         return [false, UNDEFINED_PSI_RETURN_VALUE];
     };
 
-    const gameFinished = psi3PublicSignals[0];
-    return [true, gameFinished];
+    return [true, await getGameFinishedInfo(gameStateToUpdate, psi3PublicSignals)];
+}
+
+async function getGameFinishedInfo(
+    gameStateToUpdate: GameState,
+    psi3PublicSignals: any
+) {
+    const gameFinished = await psi3PublicSignals[0];
+    if (gameFinished === '0') {
+        return undefined;
+    } else {
+        // calculate the opponent's position
+        const distDeltaToOpponent = allMoveDeltas[gameFinished - 1];
+        const opponentPosition = [gameStateToUpdate.x + distDeltaToOpponent[0], gameStateToUpdate.y + distDeltaToOpponent[1]];
+        return opponentPosition;
+    }
 }
 
 async function move(

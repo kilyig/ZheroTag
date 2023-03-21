@@ -38,6 +38,34 @@ After Alice's move, Alice and Bob execute the One-sided Board Update Protocol tw
 1. PSI based on Diffie-Hellman works for sets that contain single numbers, not tuples. However, a random oracle that maps tuples to single numbers can be found.
 
 
+**How to use this repository**:
+Start by cloning the repository:
+```
+git clone https://github.com/kilyig/zherotag-eth
+```
+You should get a folder named `zherotag-eth`. Run `cd zherotag-eth` to enter the folder. Every command after this point needs to be run inside `zherotag-eth`.
+
+First, install the necessary packages:
+```
+yarn install
+```
+
+To keep the size of the codebase small, some downloadable/generatable files were omitted from the repository. We will first download the ptau file. Start by creating the folder `circuits/ptau`: 
+```
+mkdir circuits/ptau
+```
+Then, download ptau14 from https://www.dropbox.com/sh/mn47gnepqu88mzl/AACaJkBU7mmCq8uU8ml0-0fma?dl=0 and put the file inside `circuits/ptau`.
+
+Then compile the zero-knowledge circuits:
+```
+yarn hardhat circom
+```
+
+Finally, run the tests:
+```
+yarn hardhat test
+```
+There is currently no frontend/CLI that allows you to play the game, but you can change the values in the tests (inside `test/ZheroTagLocal.ts`) to simulate a specific game.
 
 
 [zherotagcode]: https://github.com/kilyig/ZheroTag

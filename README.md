@@ -1,8 +1,21 @@
-# ZheroTag
+```
+   ____    _                                   _____              __ _  
+  |_  /   | |_       ___       _ _     ___    |_   _|   __ _     / _` | 
+   / /    | ' \     / -_)     | '_|   / _ \     | |    / _` |    \__, | 
+  /___|   |_||_|    \___|    _|_|_    \___/    _|_|_   \__,_|    |___/  
+_|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| 
+"`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' 
+```
+
+## TL;DR
+* ZheroTag is a simple game that uses both zero-knowledge proofs and multi-party computation (MPC). It is a hidden information game that can be played without a trusted third party. It was designed to act as a proof-of-concept for the use of MPC in decentralized applications, which is a virtually unexplored topic, especially in the gaming industry.
+* [Here][zherotag-slides] is a set of slides that show the game mechanics and the MPC protocol used to build the game.
+* ZheroTag can currently be played on the command line. Check the relevant section in this document.
+* Feedback is always welcome.
 
 ## Game Description
 
-ZheroTag game is played on a finite square grid with two players. Each player has a single piece on the grid. The initial coordinates of the pieces are predetermined and are relatively far from each other. The pieces move like how kings move in chess. The players can only see the squares that are the Moore neighbors of the positions of their pieces (i.e. the 8 surrounding squares if the piece is not at a border of the grid). The game is played in alternating turns. At each turn, one player moves their piece to one of the Moore neighbors. The goal is to capture the opponent's piece, which can be done only when the opponent is on a Moore neighbor.
+ZheroTag is played on a finite square grid with two players. Each player has a single piece on the grid. The initial coordinates of the pieces are predetermined and are relatively far from each other. The pieces move like how kings move in chess. The players can only see the squares that are the Moore neighbors of the positions of their pieces (i.e. the 8 surrounding squares if the piece is not at a border of the grid). The game is played in alternating turns. At each turn, one player moves their piece to one of the Moore neighbors. The goal is to capture the opponent's piece, which can be done only when the opponent is on a Moore neighbor.
 
 **Note 1**: The game is somewhat similar to [Dark Chess][darkchess], a chess variant. A chess variant very similar to Dark Chess is known as [Fog of War][fogofwar] on chess.com. A tutorial can be found [here][fogofwartutorial].
 
@@ -84,8 +97,12 @@ tsc
 node index.js
 ```
 
+## Acknowledgements
+CLI logo made at [patorjk.com][font]. Font: Train.
 
 [zherotagcode]: https://github.com/kilyig/ZheroTag
 [darkchess]: https://en.wikipedia.org/wiki/Dark_chess
 [fogofwar]: https://www.chess.com/variants/fog-of-war
 [fogofwartutorial]: https://www.youtube.com/watch?v=_1F9LHuQFxc
+[zherotag-slides]: https://docs.google.com/presentation/d/1OL8yg962QT-DHgDD-zecBKWVpN6b9eNND8x9Lz6F8Rc/edit?usp=sharing
+[font]: http://www.patorjk.com/software/taag/

@@ -2,30 +2,33 @@
 import inquirer from "inquirer";
 import chalk from "chalk";
 import chalkAnimation from "chalk-animation";
-//import { GameState, moveAndUpdateBoards } from "../test/utils/zherotag-utils.js";
+import { GameState, moveAndUpdateBoards } from "./utils/zherotag-utils.js";
 
 
 // code copied from https://www.npmjs.com/package/wania-testing1?activeTab=code
 
-// const whiteGameState: GameState = {
-//     x: 0,
-//     y: 0,
-//     salt: BigInt("12345"),
-//     posHash: BigInt("2321794270632629049109131152230501273451975640760836008986566812209223148844"),
-//     posHashOpponent: BigInt("9435539296313397007849595282098379346206722261888911142952399734225356376203"),
-//     alpha: BigInt("0"),
-//     beta: BigInt("0")
-// };
+const whiteGameState: GameState = {
+    x: 0,
+    y: 0,
+    salt: BigInt("12345"),
+    posHash: BigInt("2321794270632629049109131152230501273451975640760836008986566812209223148844"),
+    posHashOpponent: BigInt("9435539296313397007849595282098379346206722261888911142952399734225356376203"),
+    alpha: BigInt("0"),
+    beta: BigInt("0")
+};
 
-// const blackGameState: GameState = {
-//     x: 5,
-//     y: 5,
-//     salt: BigInt("12345"),
-//     posHash: BigInt("9435539296313397007849595282098379346206722261888911142952399734225356376203"),
-//     posHashOpponent: BigInt("2321794270632629049109131152230501273451975640760836008986566812209223148844"),
-//     alpha: BigInt("0"),
-//     beta: BigInt("0")
-// };
+const blackGameState: GameState = {
+    x: 5,
+    y: 5,
+    salt: BigInt("12345"),
+    posHash: BigInt("9435539296313397007849595282098379346206722261888911142952399734225356376203"),
+    posHashOpponent: BigInt("2321794270632629049109131152230501273451975640760836008986566812209223148844"),
+    alpha: BigInt("0"),
+    beta: BigInt("0")
+};
+
+let moverGameState = whiteGameState;
+let opponentGameState = blackGameState;
 
 
 let emptyBoard = [
@@ -60,7 +63,6 @@ let emptyBoard = [
 // });
 
 
-
 const sleep = ()=>{
     return new Promise((res)=>{
         setTimeout(res, 2000);
@@ -73,25 +75,69 @@ async function welcome(){
     rainbowTitle.stop(); //stop after 2 sec
 }
 
+
+let directions = new Map();
+directions.set("↑", [-1, 0]);
+directions.set("↗", [-1, 1]);
+directions.set("→", [0, 1]);
+directions.set("↘", [1, 1]);
+directions.set("↓", [1, 0]);
+directions.set("↙", [1, -1]);
+directions.set("←", [0, -1]);
+directions.set("↖", [-1, -1]);
+
+
 async function playOneMove(playerName: string){
-    const prom = ["13", "23"];
     const answer = await inquirer.prompt([
         /* Pass your questions in here */
         {
             type:"list",
             name:"moveDirection",
-            message:"It's " + playerName + "\'s turn. Where do you want to move?\n",
-            choices: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+            message:"It's " + playerName + "\'s turn. Where should it move?\n",
+            choices: ["↑", "↗", "→", "↘", "↓", "↙", "←", "↖"]
         },
     ]);
 
-    //const moveDelta = allMoveDeltas[answer.moveDirection];
+    console.log("Executing the PSI to update the boards. This will take ~20 seconds.");
+
+    // calculate the coordinates of the mover's new position
+    // const xNew = 1;
+    // const yNew = 1;
+
+    const [xDelta, yDelta] = directions.get(answer.moveDirection);
+    const xNew = moverGameState.x + xDelta;
+    const yNew = moverGameState.y + yDelta;
+
+    // make the move and run the PSI
+    const result = await moveAndUpdateBoards(moverGameState, opponentGameState, xNew, yNew);
+    const moverResult = result[0];
+    const opponentResult = result[1];
 
 
+    let whiteResultMessage = "";
+    let blackResultMessage = "";
+    if (moverResult[1] === undefined) {
+        whiteResultMessage = "I have no idea where my opponent is";
+        blackResultMessage = "I have no idea where my opponent is";
+    } else {
+        if (turnCount % 2 === 0) {
+            whiteResultMessage = "I can see my opponent at " + moverResult[1];
+            blackResultMessage = "I can see my opponent at " + opponentResult[1];
+        } else {
+            whiteResultMessage = "I can see my opponent at " + opponentResult[1];
+            blackResultMessage = "I can see my opponent at " + moverResult[1];
+        }
+    }
 
-    console.log(answer.moveDirection);
+    console.log("White:", whiteResultMessage);
+    console.log("Black:", blackResultMessage);
 
-    return false;
+    // swap the states because the other player will move in the next round
+    let temp = moverGameState;
+    moverGameState = opponentGameState;
+    opponentGameState = temp;
+
+    return moverResult[1] !== undefined;
 };
 
 function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: number) {
@@ -105,6 +151,8 @@ function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: numb
             if (xDiff <= 1 && yDiff <= 1) {
                 if (xDiff === 0 && yDiff === 0) {
                     char = 'W';
+                } else if (i === xBlack && j === yBlack) {
+                    char = 'B';
                 } else {
                     char = 'x';
                 }
@@ -119,6 +167,8 @@ function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: numb
             if (xDiff <= 1 && yDiff <= 1) {
                 if (xDiff === 0 && yDiff === 0) {
                     char = 'B';
+                } else if (i === xWhite && j === yWhite) {
+                    char = 'W';
                 } else {
                     char = 'x';
                 }
@@ -137,18 +187,29 @@ async function main(){
     await welcome();
 
     do{
-        printBoard(0, 0, 5, 5);
-        const gameFinished = await playOneMove(playerNames[turnCount % 2]);
+        printBoard(whiteGameState.x, whiteGameState.y, blackGameState.x, blackGameState.y);
 
-        var again = await inquirer
-        .prompt({
+        let gameFinished = false;
+        while (gameFinished === false) {
+            gameFinished = await playOneMove(playerNames[turnCount % 2]);
+            printBoard(whiteGameState.x, whiteGameState.y, blackGameState.x, blackGameState.y);    
+            turnCount += 1;
+        }
+
+        let winnerMessage;
+        if (turnCount % 2 === 0) {
+            winnerMessage = "White can capture Black in its next move, so White wins the game!";
+        } else {
+            winnerMessage = "Black can capture White in its next move, so Black wins the game!";
+        }
+        console.log(winnerMessage);
+
+        var continueAsker = await inquirer.prompt({
             type: "input",
-            name: "restart",
-            message: "Do you want to continue? Press y or n: "
-        })
-
-        turnCount += 1;
-    }while(again.restart == 'y' || again.restart == 'Y' || again.restart == 'yes' || again.restart == 'YES'  )
+            name: "continueGame",
+            message: "The game has finished, but you can continue moving the pieces if you want. Do you want to continue playing? Press y or n: "
+        });
+    } while (continueAsker.continueGame == 'y' || continueAsker.continueGame == 'Y' || continueAsker.continueGame == 'yes' || continueAsker.continueGame == 'YES')
 }
 
 main();

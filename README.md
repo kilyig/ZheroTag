@@ -1,5 +1,3 @@
-[![tr](https://img.shields.io/badge/lang-tr-red.svg)](https://github.com/kilyig/zherotag-eth/blob/main/README.tr.md)
-
 ```
    ____    _                                   _____              __ _  
   |_  /   | |_       ___       _ _     ___    |_   _|   __ _     / _` | 
@@ -8,6 +6,9 @@
 _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| 
 "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' 
 ```
+
+[![tr](https://img.shields.io/badge/lang-tr-red.svg)](https://github.com/kilyig/zherotag-eth/blob/main/README.tr.md)
+
 
 ## TL;DR
 * ZheroTag is a simple game that uses both zero-knowledge proofs and multi-party computation (MPC). It is a hidden information game that can be played without a trusted third party. It was designed to act as a proof-of-concept for the use of MPC in decentralized applications, which is a virtually unexplored topic, especially in the gaming industry.

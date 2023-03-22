@@ -1,6 +1,3 @@
-[![en](https://img.shields.io/badge/lang-en-blue.svg)](https://github.com/kilyig/zherotag-eth/blob/main/README.md)
-
-
 ```
    ____    _                                   _____              __ _  
   |_  /   | |_       ___       _ _     ___    |_   _|   __ _     / _` | 
@@ -9,5 +6,8 @@
 _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| 
 "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' "`-0-0-' 
 ```
+
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](https://github.com/kilyig/zherotag-eth/blob/main/README.md)
+
 
 Türkçe

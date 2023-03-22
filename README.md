@@ -1,4 +1,4 @@
-[![tr](https://img.shields.io/badge/lang-tr-red.svg)](https://github.com/kilyig/zherotag-eth/README.tr.md)
+[![tr](https://img.shields.io/badge/lang-tr-red.svg)](https://github.com/kilyig/zherotag-eth/blob/main/README.tr.md)
 
 ```
    ____    _                                   _____              __ _  

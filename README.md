@@ -1,3 +1,5 @@
+[![tr](https://img.shields.io/badge/lang-tr-red.svg)](https://github.com/kilyig/zherotag-eth/README.tr.md)
+
 ```
    ____    _                                   _____              __ _  
   |_  /   | |_       ___       _ _     ___    |_   _|   __ _     / _` | 
@@ -98,7 +100,8 @@ node index.js
 ```
 
 ## Acknowledgements
-CLI logo made at [patorjk.com][font]. Font: Train.
+* CLI logo made at [patorjk.com][font]. Font: Train.
+* READMEs in different languages: [jonatasemidio][language]'s repository
 
 [zherotagcode]: https://github.com/kilyig/ZheroTag
 [darkchess]: https://en.wikipedia.org/wiki/Dark_chess
@@ -106,3 +109,4 @@ CLI logo made at [patorjk.com][font]. Font: Train.
 [fogofwartutorial]: https://www.youtube.com/watch?v=_1F9LHuQFxc
 [zherotag-slides]: https://docs.google.com/presentation/d/1OL8yg962QT-DHgDD-zecBKWVpN6b9eNND8x9Lz6F8Rc/edit?usp=sharing
 [font]: http://www.patorjk.com/software/taag/
+[language]: https://github.com/jonatasemidio/multilanguage-readme-pattern

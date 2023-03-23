@@ -98,12 +98,22 @@ async function playOneMove(playerName: string){
         },
     ]);
 
-    console.log("Executing the PSI to update the boards. This will take ~15 seconds.");
+    console.log("After the move: 1) prove (mover) + verify (other) the validity of the last move.");
+    console.log("                2) run PSI to update the mover's view.");
+    console.log("                3) run PSI to update the other player's view.");
+    console.log("This process will take ~15 seconds.");
 
     const [xDelta, yDelta] = directions.get(answer.moveDirection);
     const xNew = moverGameState.x + xDelta;
     const yNew = moverGameState.y + yDelta;
 
+    // if (turnCount % 2 === 0) {
+    //     printBoardPSI(xNew, yNew, blackGameState.x, blackGameState.y);
+    // } else {
+    //     printBoardPSI(blackGameState.x, blackGameState.y, xNew, yNew);
+    // }
+
+    
     // make the move and run the PSI
     const result = await moveAndUpdateBoards(moverGameState, opponentGameState, xNew, yNew);
     const moverResult = result[0];
@@ -113,15 +123,15 @@ async function playOneMove(playerName: string){
     let whiteResultMessage = "";
     let blackResultMessage = "";
     if (moverResult[1] === undefined) {
-        whiteResultMessage = "\"I have no idea where my opponent is\"";
-        blackResultMessage = "\"I have no idea where my opponent is\"";
+        whiteResultMessage = "\"I have no idea where Black is\"";
+        blackResultMessage = "\"I have no idea where White is\"";
     } else {
         if (turnCount % 2 === 0) {
-            whiteResultMessage = "I can see my opponent at " + moverResult[1];
-            blackResultMessage = "I can see my opponent at " + opponentResult[1];
+            whiteResultMessage = "I can see Black at " + moverResult[1];
+            blackResultMessage = "I can see White at " + opponentResult[1];
         } else {
-            whiteResultMessage = "I can see my opponent at " + opponentResult[1];
-            blackResultMessage = "I can see my opponent at " + moverResult[1];
+            whiteResultMessage = "I can see Black at " + opponentResult[1];
+            blackResultMessage = "I can see White at " + moverResult[1];
         }
     }
 
@@ -136,10 +146,53 @@ async function playOneMove(playerName: string){
     return moverResult[1] !== undefined;
 };
 
-function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: number) {
-    let str = chalk.underline("White's view") + "          " + chalk.underline("Black's view\n");
+function printBoardPSI(xWhite: number, yWhite: number, xBlack: number, yBlack: number) {
+    let str = " " + chalk.underline("White's view") + "             " + chalk.underline("Black's view\n");
+    str += "╭─────────────╮          ╭─────────────╮\n";
+    for(let i = -1; i < 7; i++) {
+        str += "│ ";
+        for(let j = -1; j < 7; j++) {
+            let char = chalk.gray('⁇');
+            const xDiff = Math.abs(xWhite - i);
+            const yDiff = Math.abs(yWhite - j);
+            if (xDiff <= 1 && yDiff <= 1) {
+                if (xDiff === 0 && yDiff === 0) {
+                    char = chalk.bold.green('W');
+                } else if (i === xBlack && j === yBlack) {
+                    char = chalk.bold.red('B');
+                } else {
+                    char = chalk.bold.white('x');
+                }
+            }
+            str += char + ' ';
+        }
+        str += '│          │ ';
+        for(let j = -1; j < 7; j++) {
+            let char = chalk.gray('⁇');
+            const xDiff = Math.abs(xBlack - i);
+            const yDiff = Math.abs(yBlack - j);
+            if (xDiff <= 1 && yDiff <= 1) {
+                if (xDiff === 0 && yDiff === 0) {
+                    char = chalk.bold.green('B');
+                } else if (i === xWhite && j === yWhite) {
+                    char = chalk.bold.red('W');
+                } else {
+                    char = chalk.bold.white('x');
+                }
+            }
+            str += char + ' ';
+        }
+        str += '│\n';
+    }
+    str += "╰─────────────╯          ╰─────────────╯\n";
+    console.log(str);
+} 
 
+function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: number) {
+    let str = " " + chalk.underline("White's view") + "             " + chalk.underline("Black's view\n");
+    str += "╭─────────────╮          ╭─────────────╮\n";
     for(let i = 0; i < emptyBoard.length; i++) {
+        str += "│ ";
         for(let j = 0; j < emptyBoard.length; j++) {
             let char = chalk.gray('⁇');
             const xDiff = Math.abs(xWhite - i);
@@ -155,7 +208,7 @@ function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: numb
             }
             str += char + ' ';
         }
-        str += '          ';
+        str += '│          │ ';
         for(let j = 0; j < emptyBoard.length; j++) {
             let char = chalk.gray('⁇');
             const xDiff = Math.abs(xBlack - i);
@@ -171,8 +224,9 @@ function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: numb
             }
             str += char + ' ';
         }
-        str += '\n';
+        str += '│\n';
     }
+    str += "╰─────────────╯          ╰─────────────╯\n";
     console.log(str);
 } 
 

@@ -59,28 +59,15 @@ let emptyBoard = [
     [BORDER_BOTTOM_LEFT, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_BOTTOM_RIGHT],
 ];
 
-// const allMoveDeltas = new Map({
-//     ["N", [-1, 0]],
-//     NE: [-1, 1],
-//     E: [0, 1],
-//     SE: [1, 1],
-//     S: [1, 0],
-//     SW: [1, -1],
-//     W: [0, -1],
-//     NW: [-1, -1]
-// });
-
-// const allMoveDeltas Map = new Map({
-//     N: [-1, 0],
-//     NE: [-1, 1],
-//     E: [0, 1],
-//     SE: [1, 1],
-//     S: [1, 0],
-//     SW: [1, -1],
-//     W: [0, -1],
-//     NW: [-1, -1]
-// });
-
+let directionToDelta = new Map();
+directionToDelta.set("↑", [-1, 0]);
+directionToDelta.set("↗", [-1, 1]);
+directionToDelta.set("→", [0, 1]);
+directionToDelta.set("↘", [1, 1]);
+directionToDelta.set("↓", [1, 0]);
+directionToDelta.set("↙", [1, -1]);
+directionToDelta.set("←", [0, -1]);
+directionToDelta.set("↖", [-1, -1]);
 
 const sleep = ()=>{
     return new Promise((res)=>{
@@ -94,17 +81,7 @@ async function welcome(){
     rainbowTitle.stop(); //stop after 2 sec
 }
 
-let directions = new Map();
-directions.set("↑", [-1, 0]);
-directions.set("↗", [-1, 1]);
-directions.set("→", [0, 1]);
-directions.set("↘", [1, 1]);
-directions.set("↓", [1, 0]);
-directions.set("↙", [1, -1]);
-directions.set("←", [0, -1]);
-directions.set("↖", [-1, -1]);
-
-
+// TODO: not all arrows will be valid
 async function playOneMove(playerName: string){
     const answer = await inquirer.prompt([
         /* Pass your questions in here */
@@ -121,7 +98,7 @@ async function playOneMove(playerName: string){
     console.log("                3) run PSI to update the other player's view.");
     console.log("This process will take ~15 seconds.\n");
 
-    const [xDelta, yDelta] = directions.get(answer.moveDirection);
+    const [xDelta, yDelta] = directionToDelta.get(answer.moveDirection);
     const xNew = moverGameState.x + xDelta;
     const yNew = moverGameState.y + yDelta;
 

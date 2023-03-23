@@ -30,14 +30,33 @@ const blackGameState: GameState = {
 let moverGameState = whiteGameState;
 let opponentGameState = blackGameState;
 
+const BORDER_TOP_RIGHT = '╮';
+const BORDER_TOP_LEFT = '╭';
+const BORDER_BOTTOM_RIGHT = '╯';
+const BORDER_BOTTOM_LEFT = '╰';
+const BORDER_HORIZONTAL = '─';
+const BORDER_VERTICAL = '│';
+const INVISIBLE = chalk.gray('⁇');
+const VISIBLE_AND_EMPTY = chalk.bold.white('x');
+const WHITE_KING_ON_WHITE_BOARD = chalk.bold.green('W');
+const WHITE_KING_ON_BLACK_BOARD = chalk.bold.red('W');
+const BLACK_KING_ON_WHITE_BOARD = chalk.bold.red('B');
+const BLACK_KING_ON_BLACK_BOARD = chalk.bold.green('B');
+const PSI1_VISIBLES = chalk.yellow('●');
+const PSI1_KING_POS = chalk.bold.yellowBright('B');
+const PSI2_VISIBLES = chalk.blue('●');
+const PSI2_KING_POS = chalk.bold.blueBright('W');
+const SPACE_BETWEEN_BOARDS = '   ';
 
 let emptyBoard = [
-    ['?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?']
+    [BORDER_TOP_LEFT, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_TOP_RIGHT],
+    [BORDER_VERTICAL, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, BORDER_VERTICAL],
+    [BORDER_VERTICAL, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, BORDER_VERTICAL],
+    [BORDER_VERTICAL, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, BORDER_VERTICAL],
+    [BORDER_VERTICAL, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, BORDER_VERTICAL],
+    [BORDER_VERTICAL, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, BORDER_VERTICAL],
+    [BORDER_VERTICAL, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, INVISIBLE, BORDER_VERTICAL],
+    [BORDER_BOTTOM_LEFT, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_HORIZONTAL, BORDER_BOTTOM_RIGHT],
 ];
 
 // const allMoveDeltas = new Map({
@@ -70,11 +89,10 @@ const sleep = ()=>{
 }
 
 async function welcome(){
-    let rainbowTitle = chalkAnimation.rainbow('Let\'s play ZheroTag!!'); //start
+    let rainbowTitle = chalkAnimation.rainbow('Let\'s play ZheroTag!!\n'); //start
     await sleep();
     rainbowTitle.stop(); //stop after 2 sec
 }
-
 
 let directions = new Map();
 directions.set("↑", [-1, 0]);
@@ -101,23 +119,27 @@ async function playOneMove(playerName: string){
     console.log("After the move: 1) prove (mover) + verify (other) the validity of the last move.");
     console.log("                2) run PSI to update the mover's view.");
     console.log("                3) run PSI to update the other player's view.");
-    console.log("This process will take ~15 seconds.");
+    console.log("This process will take ~15 seconds.\n");
 
     const [xDelta, yDelta] = directions.get(answer.moveDirection);
     const xNew = moverGameState.x + xDelta;
     const yNew = moverGameState.y + yDelta;
 
-    // if (turnCount % 2 === 0) {
-    //     printBoardPSI(xNew, yNew, blackGameState.x, blackGameState.y);
-    // } else {
-    //     printBoardPSI(blackGameState.x, blackGameState.y, xNew, yNew);
-    // }
+    if (turnCount % 2 === 0) {
+        printBoardPSI(xNew, yNew, blackGameState.x, blackGameState.y);
+    } else {
+        printBoardPSI(whiteGameState.x, whiteGameState.y, xNew, yNew);
+    }
+
+    printLegendPSI();
 
     
     // make the move and run the PSI
     const result = await moveAndUpdateBoards(moverGameState, opponentGameState, xNew, yNew);
     const moverResult = result[0];
     const opponentResult = result[1];
+
+    printBoard(whiteGameState.x, whiteGameState.y, blackGameState.x, blackGameState.y);    
 
 
     let whiteResultMessage = "";
@@ -136,7 +158,7 @@ async function playOneMove(playerName: string){
     }
 
     console.log("White:", whiteResultMessage);
-    console.log("Black:", blackResultMessage);
+    console.log("Black:", blackResultMessage + "\n");
 
     // swap the states because the other player will move in the next round
     let temp = moverGameState;
@@ -146,87 +168,117 @@ async function playOneMove(playerName: string){
     return moverResult[1] !== undefined;
 };
 
+function printLegendPSI() {
+    // PSI for white
+    console.log("ZheroTag's PSI protocol reveals the intersection of set 1 and set 2 to the holder of set 1.");
+    console.log(chalk.yellow("PSI") + " updates White's board:");
+    console.log("   " + PSI1_VISIBLES + ": elements of set 1");
+    console.log("   " + PSI1_KING_POS + ": the only element of set 2");
+
+    // PSI for black
+    console.log(chalk.blue("PSI") + " updates Black's board:");
+    console.log("   " + PSI2_VISIBLES + ": elements of set 1");
+    console.log("   " + PSI2_KING_POS + ": the only element of set 2\n");
+}
+
+function printLegend() {
+    // PSI for white
+    console.log(chalk.bold.green("Green") + ": me");
+    console.log(chalk.bold.red("Red") + ": opponent");
+    console.log(VISIBLE_AND_EMPTY + ": I know what is there -- it's empty");
+    console.log(INVISIBLE + ": I can\'t see that\n");
+}
+
 function printBoardPSI(xWhite: number, yWhite: number, xBlack: number, yBlack: number) {
-    let str = " " + chalk.underline("White's view") + "             " + chalk.underline("Black's view\n");
-    str += "╭─────────────╮          ╭─────────────╮\n";
+    let str = " " + chalk.underline("White's view") + "  " + SPACE_BETWEEN_BOARDS + "  " + chalk.underline("Black's view\n");
+
     for(let i = -1; i < 7; i++) {
-        str += "│ ";
         for(let j = -1; j < 7; j++) {
-            let char = chalk.gray('⁇');
+            let char = emptyBoard[i + 1][j + 1];
             const xDiff = Math.abs(xWhite - i);
             const yDiff = Math.abs(yWhite - j);
             if (xDiff <= 1 && yDiff <= 1) {
                 if (xDiff === 0 && yDiff === 0) {
-                    char = chalk.bold.green('W');
-                } else if (i === xBlack && j === yBlack) {
-                    char = chalk.bold.red('B');
+                    char = PSI2_KING_POS;
                 } else {
-                    char = chalk.bold.white('x');
+                    char = PSI1_VISIBLES; // https://unicodeplus.com/U+25CF
                 }
             }
-            str += char + ' ';
+
+            // TODO: need to prevent ───● ● ● ──
+            //                         ^
+            // should be             ── ● ● ● ──
+            let filler = ' ';
+            if (char === BORDER_HORIZONTAL || char === BORDER_BOTTOM_LEFT || char === BORDER_TOP_LEFT) {
+                filler = BORDER_HORIZONTAL;
+            }
+
+            str += char + filler;
         }
-        str += '│          │ ';
+        str += SPACE_BETWEEN_BOARDS;
         for(let j = -1; j < 7; j++) {
-            let char = chalk.gray('⁇');
+            let char = emptyBoard[i + 1][j + 1];
             const xDiff = Math.abs(xBlack - i);
             const yDiff = Math.abs(yBlack - j);
             if (xDiff <= 1 && yDiff <= 1) {
                 if (xDiff === 0 && yDiff === 0) {
-                    char = chalk.bold.green('B');
-                } else if (i === xWhite && j === yWhite) {
-                    char = chalk.bold.red('W');
+                    char = PSI1_KING_POS;
                 } else {
-                    char = chalk.bold.white('x');
+                    char = PSI2_VISIBLES;
                 }
+            }            
+
+            let filler = ' ';
+            if (char === BORDER_HORIZONTAL || char === BORDER_BOTTOM_LEFT || char === BORDER_TOP_LEFT) {
+                filler = BORDER_HORIZONTAL;
             }
-            str += char + ' ';
+
+            str += char + filler;
         }
-        str += '│\n';
+        str += '\n';
     }
-    str += "╰─────────────╯          ╰─────────────╯\n";
     console.log(str);
 } 
 
 function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: number) {
-    let str = " " + chalk.underline("White's view") + "             " + chalk.underline("Black's view\n");
-    str += "╭─────────────╮          ╭─────────────╮\n";
-    for(let i = 0; i < emptyBoard.length; i++) {
+    let str = " " + chalk.underline("White's view") + "  " + SPACE_BETWEEN_BOARDS + "  " + chalk.underline("Black's view\n");
+    str += "╭─────────────╮ " + SPACE_BETWEEN_BOARDS + "╭─────────────╮\n";
+    for(let i = 0; i < 6; i++) {
         str += "│ ";
-        for(let j = 0; j < emptyBoard.length; j++) {
-            let char = chalk.gray('⁇');
+        for(let j = 0; j < 6; j++) {
+            let char = INVISIBLE;
             const xDiff = Math.abs(xWhite - i);
             const yDiff = Math.abs(yWhite - j);
             if (xDiff <= 1 && yDiff <= 1) {
                 if (xDiff === 0 && yDiff === 0) {
-                    char = chalk.bold.green('W');
+                    char = WHITE_KING_ON_WHITE_BOARD;
                 } else if (i === xBlack && j === yBlack) {
-                    char = chalk.bold.red('B');
+                    char = BLACK_KING_ON_WHITE_BOARD;
                 } else {
-                    char = chalk.bold.white('x');
+                    char = VISIBLE_AND_EMPTY;
                 }
             }
             str += char + ' ';
         }
-        str += '│          │ ';
-        for(let j = 0; j < emptyBoard.length; j++) {
-            let char = chalk.gray('⁇');
+        str += '│ ' + SPACE_BETWEEN_BOARDS + '│ ';
+        for(let j = 0; j < 6; j++) {
+            let char = INVISIBLE;
             const xDiff = Math.abs(xBlack - i);
             const yDiff = Math.abs(yBlack - j);
             if (xDiff <= 1 && yDiff <= 1) {
                 if (xDiff === 0 && yDiff === 0) {
-                    char = chalk.bold.green('B');
+                    char = BLACK_KING_ON_BLACK_BOARD;
                 } else if (i === xWhite && j === yWhite) {
-                    char = chalk.bold.red('W');
+                    char = WHITE_KING_ON_BLACK_BOARD;
                 } else {
-                    char = chalk.bold.white('x');
+                    char = VISIBLE_AND_EMPTY;
                 }
             }
             str += char + ' ';
         }
         str += '│\n';
     }
-    str += "╰─────────────╯          ╰─────────────╯\n";
+    str += "╰─────────────╯ " + SPACE_BETWEEN_BOARDS + "╰─────────────╯";
     console.log(str);
 } 
 
@@ -236,13 +288,14 @@ const playerNames = ["White", "Black"];
 async function main(){
     await welcome();
 
+    printBoard(whiteGameState.x, whiteGameState.y, blackGameState.x, blackGameState.y);
+
     do {
-        printBoard(whiteGameState.x, whiteGameState.y, blackGameState.x, blackGameState.y);
+        printLegend();
 
         let gameFinished = false;
         while (gameFinished === false) {
             gameFinished = await playOneMove(playerNames[turnCount % 2]);
-            printBoard(whiteGameState.x, whiteGameState.y, blackGameState.x, blackGameState.y);    
             turnCount += 1;
         }
 

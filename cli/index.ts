@@ -141,7 +141,7 @@ function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: numb
 
     for(let i = 0; i < emptyBoard.length; i++) {
         for(let j = 0; j < emptyBoard.length; j++) {
-            let char = chalk.gray('?');
+            let char = chalk.gray('⁇');
             const xDiff = Math.abs(xWhite - i);
             const yDiff = Math.abs(yWhite - j);
             if (xDiff <= 1 && yDiff <= 1) {
@@ -157,7 +157,7 @@ function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: numb
         }
         str += '          ';
         for(let j = 0; j < emptyBoard.length; j++) {
-            let char = chalk.gray('?');
+            let char = chalk.gray('⁇');
             const xDiff = Math.abs(xBlack - i);
             const yDiff = Math.abs(yBlack - j);
             if (xDiff <= 1 && yDiff <= 1) {

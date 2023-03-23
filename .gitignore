@@ -20,3 +20,6 @@ artifacts
 *Verifier.sol
 *.wtns
 ptau
+
+# TypeScript extras
+*.js

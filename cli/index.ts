@@ -98,11 +98,7 @@ async function playOneMove(playerName: string){
         },
     ]);
 
-    console.log("Executing the PSI to update the boards. This will take ~20 seconds.");
-
-    // calculate the coordinates of the mover's new position
-    // const xNew = 1;
-    // const yNew = 1;
+    console.log("Executing the PSI to update the boards. This will take ~15 seconds.");
 
     const [xDelta, yDelta] = directions.get(answer.moveDirection);
     const xNew = moverGameState.x + xDelta;
@@ -117,8 +113,8 @@ async function playOneMove(playerName: string){
     let whiteResultMessage = "";
     let blackResultMessage = "";
     if (moverResult[1] === undefined) {
-        whiteResultMessage = "I have no idea where my opponent is";
-        blackResultMessage = "I have no idea where my opponent is";
+        whiteResultMessage = "\"I have no idea where my opponent is\"";
+        blackResultMessage = "\"I have no idea where my opponent is\"";
     } else {
         if (turnCount % 2 === 0) {
             whiteResultMessage = "I can see my opponent at " + moverResult[1];
@@ -141,36 +137,36 @@ async function playOneMove(playerName: string){
 };
 
 function printBoard(xWhite: number, yWhite: number, xBlack: number, yBlack: number) {
-    let str = "White's view          Black's view\n";
+    let str = chalk.underline("White's view") + "          " + chalk.underline("Black's view\n");
 
     for(let i = 0; i < emptyBoard.length; i++) {
         for(let j = 0; j < emptyBoard.length; j++) {
-            let char = '?';
+            let char = chalk.gray('?');
             const xDiff = Math.abs(xWhite - i);
             const yDiff = Math.abs(yWhite - j);
             if (xDiff <= 1 && yDiff <= 1) {
                 if (xDiff === 0 && yDiff === 0) {
-                    char = 'W';
+                    char = chalk.bold.green('W');
                 } else if (i === xBlack && j === yBlack) {
-                    char = 'B';
+                    char = chalk.bold.red('B');
                 } else {
-                    char = 'x';
+                    char = chalk.bold.white('x');
                 }
             }
             str += char + ' ';
         }
         str += '          ';
         for(let j = 0; j < emptyBoard.length; j++) {
-            let char = '?';
+            let char = chalk.gray('?');
             const xDiff = Math.abs(xBlack - i);
             const yDiff = Math.abs(yBlack - j);
             if (xDiff <= 1 && yDiff <= 1) {
                 if (xDiff === 0 && yDiff === 0) {
-                    char = 'B';
+                    char = chalk.bold.green('B');
                 } else if (i === xWhite && j === yWhite) {
-                    char = 'W';
+                    char = chalk.bold.red('W');
                 } else {
-                    char = 'x';
+                    char = chalk.bold.white('x');
                 }
             }
             str += char + ' ';
@@ -186,7 +182,7 @@ const playerNames = ["White", "Black"];
 async function main(){
     await welcome();
 
-    do{
+    do {
         printBoard(whiteGameState.x, whiteGameState.y, blackGameState.x, blackGameState.y);
 
         let gameFinished = false;
@@ -205,11 +201,13 @@ async function main(){
         console.log(winnerMessage);
 
         var continueAsker = await inquirer.prompt({
-            type: "input",
+            type: "list",
             name: "continueGame",
-            message: "The game has finished, but you can continue moving the pieces if you want. Do you want to continue playing? Press y or n: "
+            message: "The game has finished, but you can continue moving the pieces if you want. Do you want to continue playing? Y or N: ",
+            choices: ["Y", "N"]
         });
-    } while (continueAsker.continueGame == 'y' || continueAsker.continueGame == 'Y' || continueAsker.continueGame == 'yes' || continueAsker.continueGame == 'YES')
+
+    } while (continueAsker.continueGame === 'Y');
 }
 
 main();

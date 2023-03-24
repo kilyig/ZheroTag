@@ -22,7 +22,7 @@ ZheroTag is played on a finite square grid with two players. Each player has a s
 
 **Note 1**: The game is somewhat similar to [Dark Chess][darkchess], a chess variant. A chess variant very similar to Dark Chess is known as [Fog of War][fogofwar] on chess.com. A tutorial can be found [here][fogofwartutorial].
 
-**Note 2**: The game described above is the simplest version of this game that still requires advanced cryptography. Once we solve the cryptography part, the game can be made more complex.
+**Note 2**: The game described above is the simplest version of this game that still requires advanced cryptography. The game can easily be made more complex.
 
 
 ## Implementation
@@ -31,9 +31,9 @@ ZheroTag is played on a finite square grid with two players. Each player has a s
 The implementation is very simple if there is a trusted party. The players share each of their moves with the trusted party, which in turn updates the board and tells each player what they can see on the board.
 
 ### Without a trusted third party
-This is what we are trying to do. The challenge with implementing without a trusted third party is to keep the locations of the pieces private while updating the views of the players. Zero-knowledge proofs can be used to prove that a move was valid without actually revealing the move. However, this information is not enough for the next player to know which moves they can make. After each move, each player needs to update their board in such a way that the opponent does not learn anything about the location of their piece. If the last move brought a piece to a square around the other piece, then both players should learn about this fact.
+This is the whole point of ZheroTag. The challenge with implementing without a trusted third party is to keep the locations of the pieces private while updating the views of the players. Zero-knowledge proofs can be used to prove that a move was valid without actually revealing the move. However, this information is not enough for the next player to know which moves they can make. After each move, each player needs to update their board in such a way that the opponent does not learn anything about the location of their piece. If the last move brought a piece to a square around the other piece, then both players should learn about this fact.
 
-## Solutions without a trusted third party
+## Solution without a trusted third party
 
 ### PSI based on Diffie-Hellman
 Let finite $U \subseteq \mathbb{Z}^2$ be the set of positions on the board. Let $\mathcal{P} = ( u, \mathcal{N}, \mathcal{S} )$ be a ZheroTag player where $u \in U$ is the current position on the board, $\mathcal{N}$ is the set of positions that $\mathcal{P}$ can move to (_neighbors_), and $\mathcal{S}$ is the set of positions that $\mathcal{P}$ can currently see.
@@ -48,11 +48,6 @@ Let Alice ($\mathcal{P}_A$) and Bob ($\mathcal{P}_B$) be the players of a ZheroT
 3. $\mathcal{P}_1$ calculates $\mathcal{X}_2^{'} = (\mathcal{X}_2)^{\alpha}$ and checks whether $\mathcal{X}_1^{'}$ and $\mathcal{X}_2^{'}$ intersect. If they intersect, then $\mathcal{P}_1$ is able to see $\mathcal{P}_2$. Otherwise, $\mathcal{P}_2$ is in the dark.
 
 After Alice's move, Alice and Bob execute the One-sided Board Update Protocol two times. For the first one, Alice assumes the role of $\mathcal{P}_1$ and Bob assumes the role of $\mathcal{P}_2$. The roles switch in the second round. If a player can see the opponent when it is their turn, they win.
-
-**Problems/Concerns**:
-
-1. PSI based on Diffie-Hellman works for sets that contain single numbers, not tuples. However, a random oracle that maps tuples to single numbers can be found.
-
 
 ## How to use this repository:
 
@@ -72,7 +67,7 @@ To keep the size of the codebase small, some downloadable/generatable files were
 ```
 mkdir circuits/ptau
 ```
-Then, download ptau14 from https://www.dropbox.com/sh/mn47gnepqu88mzl/AACaJkBU7mmCq8uU8ml0-0fma?dl=0 and put the file inside `circuits/ptau`.
+Then, download `powersOfTau28_hez_final_14.ptau` from [Polygon Hermez](https://www.dropbox.com/sh/mn47gnepqu88mzl/AACaJkBU7mmCq8uU8ml0-0fma?dl=0) and put the file inside `circuits/ptau`.
 
 Then compile the zero-knowledge circuits:
 ```

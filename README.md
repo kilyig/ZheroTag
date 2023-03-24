@@ -16,6 +16,13 @@ _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""| _|"""""|
 * ZheroTag can currently be played on the command line. Check the relevant section in this document.
 * Feedback is always welcome.
 
+<p align="center">
+  <img alt="Light" src="./images/cli_boards.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="./images/cli_boards_psi.png" width="45%">
+</p>
+
+
 ## Game Description
 
 ZheroTag is played on a finite square grid with two players. Each player has a single piece on the grid. The initial coordinates of the pieces are predetermined and are relatively far from each other. The pieces move like how kings move in chess. The players can only see the squares that are the Moore neighbors of the positions of their pieces (i.e. the 8 surrounding squares if the piece is not at a border of the grid). The game is played in alternating turns. At each turn, one player moves their piece to one of the Moore neighbors. The goal is to capture the opponent's piece, which can be done only when the opponent is on a Moore neighbor.

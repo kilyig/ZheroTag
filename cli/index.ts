@@ -4,8 +4,7 @@ import chalk from "chalk";
 import chalkAnimation from "chalk-animation";
 import { GameState, moveAndUpdateBoards } from "./utils/zherotag-utils.js";
 
-
-// code copied from https://www.npmjs.com/package/wania-testing1?activeTab=code
+// starter code copied from https://www.npmjs.com/package/wania-testing1?activeTab=code
 
 const whiteGameState: GameState = {
     x: 0,
@@ -117,7 +116,7 @@ async function playOneMove(playerName: string){
     const opponentResult = result[1];
 
     printBoard(whiteGameState.x, whiteGameState.y, blackGameState.x, blackGameState.y);    
-
+    printLegend();
 
     let whiteResultMessage = "";
     let blackResultMessage = "";
@@ -266,10 +265,9 @@ async function main(){
     await welcome();
 
     printBoard(whiteGameState.x, whiteGameState.y, blackGameState.x, blackGameState.y);
+    printLegend();
 
     do {
-        printLegend();
-
         let gameFinished = false;
         while (gameFinished === false) {
             gameFinished = await playOneMove(playerNames[turnCount % 2]);

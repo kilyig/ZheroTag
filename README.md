@@ -50,7 +50,7 @@ Let Alice ($\mathcal{P}_A$) and Bob ($\mathcal{P}_B$) be the players of a ZheroT
 **One-sided Board Update Protocol**:
 1. Player $\mathcal{P}_1$ picks a uniform $\alpha \in  \mathbb{Z}_p$ and sends $\mathcal{X}_1 = (H(\mathcal{N}_1^{'}))^\alpha$, where $H$ is a random oracle, to player $\mathcal{P}_2$ with a zero-knowledge proof that proves that (1) the move from $u$ to $u'$ is valid and that (2) the elements in $\mathcal{N}_1^{'}$ contain the neighbors of $u'$.
 
-2. $\mathcal{P}_2$ picks a uniform $\beta \in \mathbb{Z}_p$ and sends back $\mathcal{X}_1^{'} = (\mathcal{X}_1)^\beta$ and  $\mathcal{X}_2 = \{ (H(u_2))^\beta \}$. $\mathcal{P}_2$ sends along a zero-knowledge proof that proves that $\mathcal{X}_2$ was calculated correctly.
+2. $\mathcal{P}_2$ picks a uniform $\beta \in \mathbb{Z}_p$ and sends back $\mathcal{X}_1^{'} = (\mathcal{X}_1)^\beta$ and  $\mathcal{X}_2 = \{ (H(u_2))^\beta \}$. $\mathcal{P}_2$ sends along a zero-knowledge proof that proves that $\mathcal{X}_1^{'}$ and $\mathcal{X}_2$ were calculated correctly.
 
 3. $\mathcal{P}_1$ calculates $\mathcal{X}_2^{'} = (\mathcal{X}_2)^{\alpha}$ and checks whether $\mathcal{X}_1^{'}$ and $\mathcal{X}_2^{'}$ intersect. If they intersect, then $\mathcal{P}_1$ is able to see $\mathcal{P}_2$. Otherwise, $\mathcal{P}_2$ is in the dark.
 
